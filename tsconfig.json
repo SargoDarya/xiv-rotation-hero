@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+		"target": "esnext",
+		"outDir": "dist",
+		"removeComments": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true
+	},
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}
