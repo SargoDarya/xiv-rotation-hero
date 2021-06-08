@@ -5,12 +5,12 @@ import { createView } from "./utils.js";
 import { Action } from "./xiv-api.js";
 
 export enum HotbarStyle {
-  Horizontal,
-  SplitHorizontal,
-  DoubleSplitHorizontal,
-  DoubleSplitVertical,
-  SplitVertical,
-  Vertical
+  Horizontal = '12x1',
+  SplitHorizontal = '6x2',
+  DoubleSplitHorizontal = '4x3',
+  DoubleSplitVertical = '3x4',
+  SplitVertical = '2x6',
+  Vertical = '1x12'
 }
 
 export interface HotbarOptions {
@@ -57,6 +57,7 @@ export class Hotbar {
     // Remove old class before adding new class
     this.viewContainer.classList.remove(this.getHotbarStyleClass(this.hotbarStyle));
     this.viewContainer.classList.add(this.getHotbarStyleClass(style));
+    this.options.hotbarStyle = style;
   }
 
   get scale(): number {
@@ -65,7 +66,6 @@ export class Hotbar {
   set scale(scale: number) {
     this.viewContainer.style.transform = `scale(${scale})`;
     this.options.scale = scale;
-    console.log(scale);
   }
 
   constructor(

@@ -2,12 +2,12 @@ import { HotbarSlot } from "./hotbar-slot.js";
 import { createView } from "./utils.js";
 export var HotbarStyle;
 (function (HotbarStyle) {
-    HotbarStyle[HotbarStyle["Horizontal"] = 0] = "Horizontal";
-    HotbarStyle[HotbarStyle["SplitHorizontal"] = 1] = "SplitHorizontal";
-    HotbarStyle[HotbarStyle["DoubleSplitHorizontal"] = 2] = "DoubleSplitHorizontal";
-    HotbarStyle[HotbarStyle["DoubleSplitVertical"] = 3] = "DoubleSplitVertical";
-    HotbarStyle[HotbarStyle["SplitVertical"] = 4] = "SplitVertical";
-    HotbarStyle[HotbarStyle["Vertical"] = 5] = "Vertical";
+    HotbarStyle["Horizontal"] = "12x1";
+    HotbarStyle["SplitHorizontal"] = "6x2";
+    HotbarStyle["DoubleSplitHorizontal"] = "4x3";
+    HotbarStyle["DoubleSplitVertical"] = "3x4";
+    HotbarStyle["SplitVertical"] = "2x6";
+    HotbarStyle["Vertical"] = "1x12";
 })(HotbarStyle || (HotbarStyle = {}));
 export class Hotbar {
     constructor(id, hotbarManager, actionManager, options) {
@@ -62,6 +62,7 @@ export class Hotbar {
     set hotbarStyle(style) {
         this.viewContainer.classList.remove(this.getHotbarStyleClass(this.hotbarStyle));
         this.viewContainer.classList.add(this.getHotbarStyleClass(style));
+        this.options.hotbarStyle = style;
     }
     get scale() {
         return this.options.scale;
@@ -69,7 +70,6 @@ export class Hotbar {
     set scale(scale) {
         this.viewContainer.style.transform = `scale(${scale})`;
         this.options.scale = scale;
-        console.log(scale);
     }
     trigger(slotId) {
         if (!this.options.visible) {

@@ -10,6 +10,10 @@ export function createInput(type: string, ...classNames: string[]): HTMLInputEle
   return input;
 }
 
+export function createCheckbox(...classNames: string[]): HTMLInputElement {
+  return createInput('checkbox', ...classNames);
+}
+
 export function createRadio(radioGroup: string, value: string, ...classNames: string[]): HTMLInputElement {
   const input = <HTMLInputElement>createInput('radio', ...classNames);
   input.type = 'radio';
@@ -18,13 +22,27 @@ export function createRadio(radioGroup: string, value: string, ...classNames: st
   return input;
 }
 
-export function createSelect(options: [ string, string ][], ...classNames: string[]): HTMLSelectElement {
+export function createSelect(options: [ string, string ][], selectedOption: string, ...classNames: string[]): HTMLSelectElement {
   const select = <HTMLSelectElement>createView('select', ...classNames);
   options.forEach(([ label, value ]) => {
     const option = document.createElement('option');
     option.label = label;
     option.value = value;
+    option.selected = value === selectedOption;
     select.appendChild(option);
   });
   return select;
+}
+
+export function wrapForStyle(elementToWrap: HTMLElement): HTMLElement {
+  const styleWrapper = document.createElement('label');
+  styleWrapper.classList.add('ui-style');
+
+  const styleElement = document.createElement('span');
+  styleElement.classList.add('ui-style-element');
+
+  styleWrapper.appendChild(elementToWrap);
+  styleWrapper.appendChild(styleElement);
+
+  return styleWrapper;
 }

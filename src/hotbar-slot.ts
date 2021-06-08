@@ -2,20 +2,10 @@ import { Hotbar } from "./hotbar.js";
 import { createView } from "./utils.js";
 import { Action } from "./xiv-api.js";
 
-const ANIM_STEPS = [
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 1) 0%, rgba(0, 0, 0, 0.53) 0%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 10%, rgba(255, 255, 255, 1) 10%, rgba(0, 0, 0, 0.53) 10%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 20%, rgba(255, 255, 255, 1) 20%, rgba(0, 0, 0, 0.53) 20%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 30%, rgba(255, 255, 255, 1) 30%, rgba(0, 0, 0, 0.53) 30%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 40%, rgba(255, 255, 255, 1) 40%, rgba(0, 0, 0, 0.53) 40%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 0.53) 50%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%, rgba(255, 255, 255, 1) 60%, rgba(0, 0, 0, 0.53) 60%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(255, 255, 255, 1) 70%, rgba(0, 0, 0, 0.53) 70%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 80%, rgba(255, 255, 255, 1) 80%, rgba(0, 0, 0, 0.53) 80%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 90%, rgba(255, 255, 255, 1) 90%, rgba(0, 0, 0, 0.53) 90%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
-  { background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 99%, rgba(255, 255, 255, 1) 99%, rgba(0, 0, 0, 0.53) 99%, rgba(0, 0, 0, 0.43) 99%, rgba(255, 255, 255, 1) 100%)` },
+const RECAST_ANIMATION: any[] = [
+  { backgroundPositionX: '0%' },
+  { backgroundPositionX: '100%' }
 ];
-
 export class HotbarSlot {
   private readonly viewContainer = createView('div', 'hotbar-slot');
   private readonly actionImageView = createView('div', 'hotbar-slot__action');
@@ -47,13 +37,15 @@ export class HotbarSlot {
   ) {
     this.createView();
     this.action = undefined;
+    this.viewContainer.addEventListener('click', this.trigger.bind(this));
     this.hotbar.actionManager.registerSlot(this);
   }
 
   trigger() {
     if (this._action) {
       this.hotbar.actionManager.triggerAction(this._action);
-      this.actionCooldownView.animate(ANIM_STEPS, { duration: this._action.Recast100ms * 10})
+      this.actionCooldownView.style.backgroundImage = `url('./assets/icona_recast_hr1.png')`;
+      this.actionCooldownView.animate(RECAST_ANIMATION, { duration: this._action.Recast100ms * 10, easing: 'steps(80)' })
     }
 
     this.viewContainer.classList.add('hotbar-slot--triggered');
