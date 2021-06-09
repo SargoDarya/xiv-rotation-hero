@@ -1,0 +1,21 @@
+.action-history {
+  width: 300px;
+
+  &__sequence-icons {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 12px;
+    min-height: 40px;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  &__sequence-ids {
+    padding: 12px;
+    font-size: 10px;
+    min-height: 40px;
+  }
+}

@@ -1,10 +1,13 @@
 {
     "compilerOptions": {
 		"target": "esnext",
-		"outDir": "dist",
+        "module": "esnext",
+        "alwaysStrict": true,
 		"removeComments": true,
         "strictNullChecks": true,
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "outDir": "dist",
+        "rootDir": "src"
 	},
     "include": [
         "src/**/*"

@@ -1,7 +1,9 @@
-@import './toolbar.scss';
-@import './hotbar.scss';
-@import './dialog.scss';
-@import './form.scss';
+@import './scss/toolbar.scss';
+@import './scss/hotbar.scss';
+@import './scss/dialog.scss';
+@import './scss/form.scss';
+@import './scss/rotation-hero.scss';
+@import './scss/action-history.scss';
 
 html, body {
   margin: 0;
