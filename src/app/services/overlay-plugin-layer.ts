@@ -26,7 +26,7 @@ export class OverlayPluginLayer extends CommunicationLayer {
     const q = this.queue;
     this.queue = null;
 
-    window.__OverlayCallback = this.processEvent;
+    window.__OverlayCallback = this.processEvent.bind(this);
 
     if (q) {
       for (let [ msg, resolve ] of q) {

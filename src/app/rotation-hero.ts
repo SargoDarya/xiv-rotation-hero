@@ -86,7 +86,7 @@ export class RotationHero {
   public setCurrentClassJobId(classJobId: number) {
     this.currentClassJobId = classJobId;
     this.updatePresets();
-    this.selectRotationSet(null);
+    this.selectRotationSet(this.rotationPresets[0]);
   }
 
   public setPresets(presets: RotationSet[]) {
