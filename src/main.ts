@@ -1,4 +1,4 @@
-import { CommunicationLayer } from "./app/services/communication-layer.js";
+import { CommunicationLayer, LogLineEvent } from "./app/services/communication-layer.js";
 import { OverlayPluginLayer } from "./app/services/overlay-plugin-layer.js";
 import { RotationHero } from "./app/rotation-hero.js";
 import { WebsocketLayer } from "./app/services/websocket-layer.js";
@@ -45,9 +45,38 @@ export class ACTRotationTrainer {
       const rotationHero = new RotationHero({ gameDataService: this.gameDataService });
       document.body.appendChild(rotationHero.viewContainer);
 
-      this.communicationLayer.addOverlayListener('LogLine', (evt) => {
-        console.log(evt);
+      this.communicationLayer.addOverlayListener('LogLine', (evt: LogLineEvent) => {
+        const ignoreEvents = ['00', '16', '39', '31', '26'];
+        if (ignoreEvents.indexOf(evt.line[0]) !== -1) { return; }
+
+        if (evt.line[0] !== '21') {
+          console.log(evt.line);
+        }
+
+        switch(evt.line[0]) {
+          case '12': 
+            console.log(`Role changed to ${evt.line[2]}`);
+            rotationHero.setCurrentClassJobId(Number(evt.line[2]));
+            break;
+          
+          case '20':
+            // Casting
+
+          case '21':
+            // Disregard auto-attacks
+            if (evt.line[4] === '07') return;
+
+            rotationHero.recordAction(parseInt(evt.line[4], 16));
+            break;
+          
+          case '14':
+            // status effect removed
+
+          case '26':
+            // status effect added
+        }
       });
+      this.communicationLayer.startOverlayEvents();
     }
   }
 }
