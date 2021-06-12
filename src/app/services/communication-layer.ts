@@ -9,6 +9,91 @@ export interface LogLineEvent {
   rawLine: string
 }
 
+interface LogLineBaseEvent {
+  type: string;
+  timestamp: string;
+  checksum: string;
+}
+
+// RoleChangeEvent
+interface RoleChangeEvent extends LogLineBaseEvent {
+  type: '12';
+  // timestamp
+  classJobId: number;
+  strengthValue: number;
+  dexterityValue: number;
+  vitalityValue: number;
+  intelligenceValue: number;
+  mindValue: number;
+  pietyValue: number
+  attackPowerValue: number;
+  directHitRateValue: number;
+  criticalHitValue: number;
+  _unknownValue1: any;
+  healingMagicPotencyValue: number;
+  determinationValue: number;
+  skillSpeedValue: number;
+  spellSpeedValue: number;
+  _unknownValue2: any;
+  tenacityValue: number;
+  _unknownValue3: any;
+}
+
+// ActionCastEvent
+interface ActionCastEvent extends LogLineBaseEvent {
+  type: '20'
+  // timestamp
+  playerId: string;
+  playerName: string;
+  attackId: number;
+  attackName: string;
+  attackTarget: string;
+  attackTargetName: string;
+  castDuration: number;
+}
+
+// ActionEvent
+interface ActionEvent extends LogLineBaseEvent {
+  type: '21';
+  // timestamp
+  playerId: string;
+  playerName: string;
+  attackId: number;
+  attackName: string;
+  attackTarget: string;
+  attackTargetName: string;
+  castDuration: number;
+}
+
+interface ActorStatusEffectRemovedEvent extends LogLineBaseEvent {
+  type: '30';
+  // timestamp
+  statusEffectId: number;
+  statusEffectName: string;
+  remainingTime: number;
+  effectSourceId: string;
+  effectSource: string;
+  effectTargetId: string;
+  effectTargetName: string;
+  _unknownValue1: any;
+  _unknownValue2: any;
+  _unknownValue3: any;
+  _unknownValue4: any;
+}
+
+interface ActorTickEvent extends LogLineBaseEvent {
+  type: '39';
+  // timestamp
+  playerId: string;
+  playerName: string;
+  playerHP: number;
+  playerMaxHP: number;
+  playerMP: number;
+  playerMaxMP: number;
+}
+
+//
+
 export abstract class CommunicationLayer {
 
   protected queue: any[] | null = [];
@@ -50,85 +135,6 @@ Please register your listeners before calling startOverlayEvents().`);
     }
   }
 
-  // [00] Chat log message
-  // irrelevant
-
-  // [12] Role changed
-  // 0: 12
-  // 1: Timestamp
-  // 2: ClassJobId
-  // 3: StrengthValue
-  // 4: DexterityValue
-  // 5: VitalityValue
-  // 6: IntelligenceValue
-  // 7: MindValue
-  // 8: PietyValue
-  // 9: AttackPowerValue
-  // 10: DirectHitRateValue
-  // 11: CriticalHitValue
-  // 12: ?
-  // 13: HealingMagicPotencyValue
-  // 14: DeterminationValue
-  // 15: SkillSpeedValue
-  // 16: SpellSpeedValue
-  // 17: ?
-  // 18: TenacityValue
-  // 19: ?
-  // 20: Checksum
-
-  // [20] Cast message - Done
-  // 0: 21
-  // 1: Timestamp
-  // 2: PlayerId
-  // 3: PlayerName
-  // 4: AttackId
-  // 5: AttackName
-  // 6: AttackTarget
-  // 7: AttackTargetName
-  // 8: CastDuration
-
-  // [21] Attack message
-  // 0: 21
-  // 1: Timestamp
-  // 2: PlayerId
-  // 3: PlayerName
-  // 4: AttackId
-  // 5: AttackName
-  // 6: AttackTarget
-  // 7: AttackTargetName
-
-  // [30]: Enemy status effect removed
-  // 0: 30
-  // 1: Timestamp
-  // 2: StatusEffectId
-  // 3: StatusEffectName
-  // 4: RemainingTime
-  // 5: EffectSourceId
-  // 6: EffectSource
-  // 7: EffectTarget
-  // 8: EffectTargetName
-  // 9: ?
-  // 10: ?
-  // 11: ?
-  // 12: ?
-  // 13: Checksum
-
-  // [39] Tick update
-  // 0: 39
-  // 1: Timestamp
-  // 2: PlayerId
-  // 3: PlayerName
-  // 4: PlayerHP
-  // 5: PlayerMaxHP
-  // 6: PlayerMP
-  // 7: PlayerMaxMP
-  // 
-
-  // [251] Connection Status Update
-  // 0: 251
-  // 1: Timestamp
-  // 2: Message
-  // 3: Checksum
   public parseLogLine(line: LogLineEvent) {
   }
 
