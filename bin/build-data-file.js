@@ -26,15 +26,18 @@ class XIVApi {
           `IsPvP=0`
       ].join(',');
       const columns = [
-          'ID',
-          'Name',
-          'Description',
-          'ClassJobLevel',
-          'CooldownGroup',
-          'ActionCombo',
-          'IconHD',
-          'Cast100ms',
-          'Recast100ms'
+        'ID',
+        'Name',
+        'Description',
+        'ClassJobLevel',
+        'CooldownGroup',
+        'ActionComboTargetID',
+        'IconHD',
+        'Cast100ms',
+        'Recast100ms',
+        'PreservesCombo',
+        'PrimaryCostType',
+        'PrimaryCostValue'
       ].join(',');
       return this.getAPI(`/search?indexes=action&filters=${filters}&columns=${columns}`).then((response) => response.Results);
   }

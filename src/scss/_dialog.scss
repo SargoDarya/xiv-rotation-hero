@@ -1,12 +1,18 @@
 .dialog {
-  border: 5px solid goldenrod;
+  border: 2px solid transparent;
   border-radius: 12px;
+  overflow: hidden;
   display: none;
   position: absolute;
-  background: #242424;
+  background: rgba(36, 36, 36, 0.9);
   box-shadow: 0 5px 20px 5px rgba(0, 0, 0, 0.2);
   color: white;
   will-change: top, left;
+  min-width: 300px;
+
+  &--focus {
+    border: 2px solid goldenrod;
+  }
 
   &--visible {
     display: block;
@@ -17,6 +23,7 @@
     font-family: copperplate;
     color: white;
     cursor: pointer;
+    padding: 4px 12px;
   }
 
   &__close-button {
@@ -36,4 +43,8 @@
       text-shadow: 0 0 2px black;
     }
   }
+}
+
+.drag-handle {
+  cursor: move;
 }

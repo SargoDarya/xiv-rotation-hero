@@ -1,5 +1,6 @@
 import { HotbarSlot } from "../hotbar-slot";
-import { Action } from "../interfaces";
+import { Action, Services } from "../interfaces";
+import { ServiceBase } from "./service-base";
 
 interface CooldownGroup {
   start: number;
@@ -7,7 +8,7 @@ interface CooldownGroup {
   remaining: number;
 }
 
-export class ActionService extends EventTarget {
+export class ActionService extends EventTarget implements ServiceBase {
   private cooldownGroups: { [ groupId: number ]: CooldownGroup } = {};
   private currentTime: number = performance.now();
   private actionBuffer: Action | null = null;
@@ -15,9 +16,11 @@ export class ActionService extends EventTarget {
   private comboActive: boolean;
   private hotbarSlots: HotbarSlot[] = [];
 
-  constructor() {
+  constructor(private readonly services: Services) {
     super();
   }
+
+  init() {};
 
   registerSlot(slot: HotbarSlot): void {
     this.hotbarSlots.push(slot);

@@ -70,8 +70,8 @@ export class Hotbar {
 
   constructor(
       private readonly id: number,
-      public readonly hotbarManager: HotbarService,
-      public readonly actionManager: ActionService,
+      public readonly hotbarService: HotbarService,
+      public readonly actionService: ActionService,
       // Options are passed in as reference only for automatic changes on hotbars
       private readonly options: HotbarOptions) {
 
@@ -114,6 +114,13 @@ export class Hotbar {
 
   getSlotAction(slotId: number): Action | undefined {
     return this.hotbarSlots[ slotId ].action;
+  }
+
+  /**
+   * Returns an array of action id or null for persistance
+   */
+  getSlotActionIds() {
+    return this.hotbarSlots.map((slot) => slot.action ? slot.action.ID : null);
   }
 
   getHotbarStyleClass(hotbarStyle: HotbarStyle) {
@@ -174,7 +181,7 @@ export class Hotbar {
     document.removeEventListener('mouseup', this.onMouseDragStop);
     document.removeEventListener('mousemove', this.onMouseMove);
 
-    this.hotbarManager.persistSettings();
+    this.hotbarService.persistSettings();
   }
 
 }

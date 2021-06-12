@@ -1,9 +1,10 @@
-import { Action } from "../interfaces.js";
+import { Action, Services } from "../interfaces.js";
 import { ActionService } from "../services/action.service.js";
 import { createView } from "../utils.js";
 import { DialogBase } from "./dialog-base.js";
 
-export class ActionHistoryDialog extends DialogBase {
+export class RotationBuilderDialog extends DialogBase {
+  public uiTitle = 'Rotation Builder';
 
   private _actions: Action[] = [];
   set actions(actions: Action[]) {
@@ -18,16 +19,16 @@ export class ActionHistoryDialog extends DialogBase {
   private readonly sequenceIdsView = createView('div', 'action-history__sequence-ids');
 
   constructor(
-    private readonly actionService: ActionService
+    services: Services
   ) {
-    super();
+    super(services);
 
     this.isVisible = false;
-    this.title = 'Action History';
-    this.dialogClass = 'action-history';
+    this.title = 'Rotation Builder';
+    this.dialogClass = 'rotation-builder';
 
     // Set up listeners
-    this.actionService.addEventListener('trigger', this.onAction.bind(this));
+    this.services.actionService.addEventListener('trigger', this.onAction.bind(this));
 
     // Set up
     this.appendChild(this.sequenceIconsView);
@@ -37,7 +38,10 @@ export class ActionHistoryDialog extends DialogBase {
   }
 
   private onAction(actionEvent: CustomEvent<Action>) {
-    this.actions = [ ...this.actions, actionEvent.detail ];
+    // only record when visible
+    if (this.isVisible) {
+      this.actions = [ ...this.actions, actionEvent.detail ];
+    }
   }
 
   private renderView() {

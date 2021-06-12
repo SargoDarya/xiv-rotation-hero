@@ -1,10 +1,15 @@
-export class KeyBindingService {
+import { Services } from "../interfaces";
+import { ServiceBase } from "./service-base";
+
+export class KeyBindingService implements ServiceBase {
 
   private availableBindings: { [ k: string ]: () => {} } = {};
   private keyBindings: { [ k: string ]: string } = {};
   private reverseMapping: { [ k: string ]: string } = {};
 
-  constructor() {
+  constructor(private readonly services: Services) {}
+
+  public init() {
     this.loadKeyBindings();
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }

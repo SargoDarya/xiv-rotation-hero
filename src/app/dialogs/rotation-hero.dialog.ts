@@ -1,29 +1,40 @@
 import { DialogBase } from "./dialog-base.js";
 import { RotationHero } from "../rotation-hero.js";
-import { GameDataService } from "../services/game-data.service.js";
-import { ActionService } from "../services/action.service.js";
-import { Action } from "../interfaces.js";
+import { Action, Services } from "../interfaces.js";
+import { AppStateEvent } from "../services/app-state.service.js";
 
 export class RotationHeroDialog extends DialogBase {
+  public uiTitle = 'Rotation Hero';
 
+  private rotationHero: RotationHero;
 
   constructor(
-    private readonly gameDataService: GameDataService,
-    private readonly actionService: ActionService
+    services: Services
   ) {
-    super({
-      closable: false,
-      resizable: false
-    });
+    super(
+      services,
+      {
+        closable: false,
+        resizable: false
+      }
+    );
 
-    const rotationHero = new RotationHero(this.gameDataService, false);
+    this.rotationHero = new RotationHero(this.services, false);
     this.isVisible = true;
 
-    this.contentContainer.appendChild(rotationHero.viewContainer);
+    this.contentContainer.appendChild(this.rotationHero.viewContainer);
 
-    this.actionService.addEventListener('trigger', (evt: CustomEvent<Action>) => {
-      rotationHero.recordAction(evt.detail.ID);
+    this.services.actionService.addEventListener('trigger', (evt: CustomEvent<Action>) => {
+      this.rotationHero.recordAction(evt.detail.ID);
     });
+
+    this.services.appStateService.addEventListener(AppStateEvent.ClassJobChanged, (evt: CustomEvent<number>) => {
+      this.rotationHero.setCurrentClassJobId(evt.detail);
+    });
+
+    if (this.services.appStateService.selectedClassJobID !== -1) {
+      this.rotationHero.setCurrentClassJobId(this.services.appStateService.selectedClassJobID);
+    }
 
     this.afterViewCreated();
   }

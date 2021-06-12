@@ -1,9 +1,11 @@
 import { Action, Job } from "../interfaces";
+import { RotationSet } from "../rotation-hero";
 
 export class GameDataService extends EventTarget {
   private actionsById: { [ actionId: number ]: Action } = {};
   private actionsByClassJob: { [ classJobId: string ]: Action[] } = {};
   private classJobs: Job[] = [];
+  private rotationPresets: RotationSet[];
 
   async load() {
     // Load game data
@@ -13,7 +15,10 @@ export class GameDataService extends EventTarget {
         .then(this.registerActions.bind(this)),
       fetch('./assets/classjobs.json')
         .then(response => response.json())
-        .then((response) => this.classJobs = response)
+        .then((response) => this.classJobs = response),
+      fetch('./assets/rotation-presets.json')
+        .then(response => response.json())
+        .then((response) => this.rotationPresets = response)
     ]);
 
     this.dispatchEvent(new CustomEvent('gamedataloaded'));
@@ -23,12 +28,16 @@ export class GameDataService extends EventTarget {
     return this.actionsById[ id ];
   }
 
-  getActionsByClass(classJobId: number) {
+  getActionsByClassJobId(classJobId: number) {
     return this.actionsByClassJob[ classJobId ];
   }
 
   getClassJobs() {
     return this.classJobs;
+  }
+
+  getRotationPresets() {
+    return this.rotationPresets;
   }
 
   private registerActions(actions: { [ classJobId: string ]: Action[] }): void {

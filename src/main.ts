@@ -2,15 +2,21 @@ import { CommunicationLayer } from "./app/services/communication-layer.js";
 import { OverlayPluginLayer } from "./app/services/overlay-plugin-layer.js";
 import { RotationHero } from "./app/rotation-hero.js";
 import { WebsocketLayer } from "./app/services/websocket-layer.js";
-import { ActionService } from "./app/services/action.service.js";
-import { Action } from "./app/interfaces.js";
 import { GameDataService } from "./app/services/game-data.service.js";
 
+/**
+ * This is the main class which is bootstrapping the application.
+ *
+ * As this acts as a hybrid application for ACT and browser usage this
+ * houses the logic to either connect to ACT and show the minimal view or
+ * to create the complete ManualUI to work in the browser with a simulation.
+ */
 export class ACTRotationTrainer {
   private communicationLayer: CommunicationLayer | null;
   private gameDataService = new GameDataService();
 
   constructor() {
+    // Load all necessary data first before initialising anything.
     this.gameDataService.addEventListener('gamedataloaded', this.init.bind(this));
     this.gameDataService.load();
   }
@@ -29,15 +35,19 @@ export class ACTRotationTrainer {
     if (!this.communicationLayer) {
       // Load more stuff which is necessary to display
       // everything. This is done so the ACT overlay isn't
-      // loading unnecessary scripts
+      // loading unnecessary scripts.
       import('./app/manual-ui.js').then(({ ManualUI }) => {
         const manualUI = new ManualUI(this.gameDataService);
         manualUI.startTicking();
       });
     } else {
       // Handle action recording in here
-      const rotationHero = new RotationHero(this.gameDataService);
+      const rotationHero = new RotationHero({ gameDataService: this.gameDataService });
       document.body.appendChild(rotationHero.viewContainer);
+
+      this.communicationLayer.addOverlayListener('LogLine', (evt) => {
+        console.log(evt);
+      });
     }
   }
 }

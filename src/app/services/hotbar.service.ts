@@ -1,10 +1,22 @@
 import { ActionService } from "./action.service.js";
 import { Hotbar, HotbarOptions, HotbarStyle } from "../hotbar.js";
-import { Action } from "../interfaces.js";
+import { Action, Services } from "../interfaces.js";
 import { KeyBindingService } from "./key-binding.service.js";
+import { CrossHotbar } from "../cross-hotbar.js";
+import { GamepadService } from "./gamepad.service.js";
+import { GameDataService } from "./game-data.service.js";
+import { ServiceBase } from "./service-base.js";
+import { AppStateEvent } from "./app-state.service.js";
 
-export class HotbarService {
+interface HotbarAllocation {
+  hotbars: [number[],number[],number[],number[],number[],number[],number[],number[],number[],number[]];
+  crossHotbars: [number[],number[],number[],number[],number[],number[],number[],number[]];
+}
+
+export class HotbarService implements ServiceBase {
   public hotbars: Hotbar[];
+  public crossHotbar: CrossHotbar;
+
   private hotbarSettings: HotbarOptions[];
   private HOTBAR_KEYS = [
     'Digit1',
@@ -20,12 +32,26 @@ export class HotbarService {
     'KeyA',
     'KeyB'
   ];
+  private currentClassJobId: number;
 
-  constructor(
-      private readonly keyBindingManager: KeyBindingService,
-      private readonly actionManager: ActionService) {
+  constructor(private readonly services: Services) {}
+
+  public init() {
     this.hotbarSettings = this.loadSettings();
     this.constructHotbars();
+
+    this.crossHotbar = new CrossHotbar(this.services);
+    document.body.appendChild(this.crossHotbar.viewContainer);
+
+    // Listen to class changes
+    this.services.appStateService.addEventListener(AppStateEvent.ClassJobChanged, (evt: CustomEvent<number>) => {
+      this.setCurrentClassJobId(evt.detail);
+    });
+
+    // Check if class already was set
+    if (this.services.appStateService.selectedClassJobID !== -1) {
+      this.setCurrentClassJobId(this.services.appStateService.selectedClassJobID)
+    }
   }
 
   private constructHotbars() {
@@ -40,11 +66,11 @@ export class HotbarService {
         case 3: keyModifier = 'Alt+'; break;
       }
 
-      const hotbar = new Hotbar(i, this, this.actionManager, this.hotbarSettings[ i ]);
+      const hotbar = new Hotbar(i, this, this.services.actionService, this.hotbarSettings[ i ]);
       hotbars.push(hotbar);
 
       for (let k=0; k<12; k++) {
-        this.keyBindingManager.registerAvailableBindings(
+        this.services.keyBindingService.registerAvailableBindings(
           `Hotbar${i+1} Action${k+1}`,
           i < 4 ? `${keyModifier}${this.HOTBAR_KEYS[k]}` : undefined,
           () => {
@@ -57,13 +83,49 @@ export class HotbarService {
     this.hotbars = hotbars;
   }
 
-  public autoSetActions(actions: Action[]) {
-    actions.forEach((action, index) => {
-      const hotbar = this.hotbars[ Math.floor(index / 12) ];
-      const slotId = index % 12;
 
-      hotbar.setSlotAction(slotId, action);
-    });
+  public setCurrentClassJobId(classJobId: number) {
+    this.currentClassJobId = classJobId;
+
+    // Check if there's a stored state for this job in local storage
+    const existingHotbarData = localStorage.getItem(`hotbar-placement-${classJobId}`);
+
+    this.clearAllHotbars();
+
+    if (existingHotbarData !== null) {
+      const hotbarAllocations = <HotbarAllocation>JSON.parse(existingHotbarData);
+      hotbarAllocations.hotbars.forEach((hotbarAllocation, hotbarIndex) => {
+        hotbarAllocation.forEach((slot, slotIndex) => {
+          if (slot) {
+            this.hotbars[ hotbarIndex ].setSlotAction(slotIndex, this.services.gameDataService.getActionById(slot));
+          }
+        });
+      });
+    } else {
+      const actions = this.services.gameDataService.getActionsByClassJobId(classJobId);
+      this.autoSetActions(actions);
+    }
+  }
+
+  private clearAllHotbars() {
+    this.hotbars.forEach(this.clearHotbar);
+  }
+
+  private clearHotbar(hotbar: Hotbar) {
+    for (let i = 0; i < 12; i++) {
+      hotbar.setSlotAction(i, undefined);
+    }
+  }
+
+  private autoSetActions(actions: Action[]) {
+    if (actions) {
+      actions.forEach((action, index) => {
+        const hotbar = this.hotbars[ Math.floor(index / 12) ];
+        const slotId = index % 12;
+
+        hotbar.setSlotAction(slotId, action);
+      });
+    }
   }
 
   /**
@@ -75,6 +137,8 @@ export class HotbarService {
 
     this.hotbars[ targetHotbarId ].setSlotAction(targetSlotId, sourceSlotAction);
     this.hotbars[ sourceHotbarId ].setSlotAction(sourceSlotId, targetSlotAction);
+
+    this.persistHotbarAllocation();
   }
 
   private loadSettings(): HotbarOptions[] {
@@ -84,6 +148,9 @@ export class HotbarService {
       return JSON.parse(savedSettings);
     }
 
+    /**
+     * Return some sane defaults for the hotbars
+     */
     return [
       { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0.1 ], scale: .8 },
       { visible: true,  hotbarStyle: HotbarStyle.SplitHorizontal, position: [ 0, 0.15 ], scale: .8 },
@@ -100,5 +167,12 @@ export class HotbarService {
 
   public persistSettings() {
     localStorage.setItem('hotbar-settings', JSON.stringify(this.hotbarSettings));
+  }
+
+  public persistHotbarAllocation() {
+    localStorage.setItem(`hotbar-placement-${this.currentClassJobId}`, JSON.stringify({
+      hotbars: this.hotbars.map((hotbar) => hotbar.getSlotActionIds()),
+      crossHotbars: []
+    }));
   }
 }

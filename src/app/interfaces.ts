@@ -1,3 +1,10 @@
+import { ActionService } from "./services/action.service";
+import { AppStateService } from "./services/app-state.service";
+import { GameDataService } from "./services/game-data.service";
+import { GamepadService } from "./services/gamepad.service";
+import { HotbarService } from "./services/hotbar.service";
+import { KeyBindingService } from "./services/key-binding.service";
+
 export interface JobShort {
   Abbreviation: string;
   BattleClassIndex: number | string;
@@ -25,8 +32,25 @@ export interface Action {
   Description: string,
   ClassJobLevel: number,
   CooldownGroup: number,
-  ActionCombo: any,
+  ActionComboTargetID: any,
   IconHD: string,
   Cast100ms: number,
-  Recast100ms: number
+  Recast100ms: number,
+  PreservesCombo: number,
+  PrimaryCostType: number,
+  PrimaryCostValue: number
 }
+
+export interface Services {
+  actionService: ActionService;
+  appStateService: AppStateService;
+  gameDataService: GameDataService;
+  gamepadService: GamepadService;
+  hotbarService: HotbarService;
+  keyBindingService: KeyBindingService;
+}
+
+// private readonly keyBindingService = new KeyBindingService();
+// private readonly actionService = new ActionService();
+// private readonly gamepadService = new GamepadService();
+// private readonly hotbarService;

@@ -1,9 +1,11 @@
 @import './scss/toolbar.scss';
 @import './scss/hotbar.scss';
+@import './scss/cross-hotbar.scss';
 @import './scss/dialog.scss';
 @import './scss/form.scss';
 @import './scss/rotation-hero.scss';
 @import './scss/action-history.scss';
+@import 'src/scss/actions-traits-dialog';
 
 html, body {
   margin: 0;

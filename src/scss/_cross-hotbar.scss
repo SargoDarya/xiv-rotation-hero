@@ -1,0 +1,56 @@
+.cross-hotbar {
+  position: absolute;
+  display: flex;
+  bottom: 0;
+
+  $slot-size: 60px;
+
+  &__side {
+    display: grid;
+    height: $slot-size * 2;
+    grid-template-columns: 1fr 1fr 1fr .3fr 1fr 1fr 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". slot2 . . . slot6 ."
+      "slot1 slot2 slot4 . slot5 slot6 slot8"
+      "slot1 slot3 slot4 . slot5 slot7 slot8"
+      ". slot3 . . . slot7 .";
+
+    &--active {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+    }
+  }
+
+  &__separator {
+    border: 1px solid white;
+    margin: 0 1rem;
+  }
+
+  &__slot {
+    width: $slot-size;
+    height: $slot-size;
+    background: linear-gradient(180deg, rgba(53,53,53,.2) 19%, rgba(35,35,35,.2) 100%);
+    border-bottom: rgba(170, 170, 170, 0.233) 2px solid;
+    box-shadow: 0 3px 5px inset rgba(0, 0, 0, 0.534);
+    transform: scale(.9);
+    flex-grow: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    &--triggered {
+      box-shadow: 0 0 10px 5px white;
+    }
+
+    &--1 { grid-area: slot1; }
+    &--2 { grid-area: slot2; }
+    &--3 { grid-area: slot3; }
+    &--4 { grid-area: slot4; }
+    &--5 { grid-area: slot5; }
+    &--6 { grid-area: slot6; }
+    &--7 { grid-area: slot7; }
+    &--8 { grid-area: slot8; }
+  }
+}

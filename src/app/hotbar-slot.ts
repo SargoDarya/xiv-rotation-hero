@@ -38,14 +38,17 @@ export class HotbarSlot {
     this.createView();
     this.action = undefined;
     this.viewContainer.addEventListener('click', this.trigger.bind(this));
-    this.hotbar.actionManager.registerSlot(this);
+    this.hotbar.actionService.registerSlot(this);
+    this.hotbar.actionService.addEventListener('trigger', this.updateActionState.bind(this));
   }
 
   trigger() {
     if (this._action) {
-      this.hotbar.actionManager.triggerAction(this._action);
+      this.hotbar.actionService.triggerAction(this._action);
       this.actionCooldownView.style.backgroundImage = `url('./assets/icona_recast_hr1.png')`;
-      this.actionCooldownView.animate(RECAST_ANIMATION, { duration: this._action.Recast100ms * 10, easing: 'steps(80)' })
+      this.actionCooldownView.animate(RECAST_ANIMATION, { duration: this._action.Recast100ms * 10, easing: 'steps(80)' }).finished.then(() => {
+        this.actionCooldownView.style.backgroundImage = 'none';
+      });
     }
 
     this.viewContainer.classList.add('hotbar-slot--triggered');
@@ -54,16 +57,27 @@ export class HotbarSlot {
     }, 100);
   }
 
+  updateActionState(evt: CustomEvent<Action>) {
+    if (this.action && this.action.ActionComboTargetID) {
+      if (this.action.ActionComboTargetID === evt.detail.ID) {
+        // Combo started
+        this.actionImageView.classList.add('hotbar-slot__action--combo');
+      } else if (evt.detail.PreservesCombo === 0) {
+        // Combo cancelled
+        this.actionImageView.classList.remove('hotbar-slot__action--combo');
+      }
+    }
+  }
+
   updateView() {
     // Check if action is on cooldown
     if (!this._action) {
       return;
     }
 
-    const currentCooldown = this.hotbar.actionManager.isActionOnCooldown(this._action);
+    const currentCooldown = this.hotbar.actionService.isActionOnCooldown(this._action);
 
     if (currentCooldown !== this.lastCooldownValue) {
-      // this.actionCooldownView.innerText = currentCooldown.toString();
       this.lastCooldownValue = currentCooldown;
     }
   }
@@ -104,7 +118,7 @@ export class HotbarSlot {
         case 'slot-to-slot':
           const sourceHotbarId = parseInt(evt.dataTransfer.getData('hotbarId'), 10);
           const sourceSlotId = parseInt(evt.dataTransfer.getData('slotId'), 10);
-          this.hotbar.hotbarManager.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
+          this.hotbar.hotbarService.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
 
         default:
           break;

@@ -1,3 +1,5 @@
+import { Services } from "../interfaces.js";
+import { AppStateEvent } from "../services/app-state.service.js";
 import { createView } from "../utils.js";
 
 class DialogDefaults {
@@ -6,10 +8,15 @@ class DialogDefaults {
 }
 export abstract class DialogBase {
   public viewContainer = createView('div', 'dialog');
+  public contentContainer = createView('div', 'dialog__content');
   private closeButton = createView('button', 'dialog__close-button');
   private titleContainer = createView('div', 'dialog__title', 'drag-handle');
-  public contentContainer = createView('div', 'dialog__content');
 
+  public abstract uiTitle: string;
+
+  protected readonly services: Services;
+
+  private position: [ Number, Number ];
   private lastMousePosition: [ number, number ] = [ 0, 0 ];
 
   /**
@@ -24,52 +31,93 @@ export abstract class DialogBase {
     return this.visible;
   }
 
+  /**
+   * Sets a title for the dialog. If no title is set
+   * it will be hidden.
+   */
   private _title: string = 'Dialog';
   public set title(title: string) {
     this._title = title;
     this.titleContainer.innerText = title;
+    this.titleContainer.style.display = title.length > 0 ? 'block' : 'none';
   }
   public get title() {
     return this._title;
   }
 
+  /**
+   * Sets a specific dialog class
+   */
   private _dialogClass: string = '';
   public set dialogClass(dialogClass: string) {
     this._dialogClass && this.viewContainer.classList.remove(this._dialogClass);
     this._dialogClass = dialogClass;
-    this.viewContainer.classList.add(this._dialogClass);
+    this.contentContainer.classList.add(this._dialogClass);
   }
   public get dialogClass(): string {
     return this.dialogClass;
   }
 
-  constructor(options: DialogDefaults = new DialogDefaults()) {
+  constructor(services: Services, options: DialogDefaults = new DialogDefaults()) {
+    this.services = services;
     this.onMouseDragStop = this.onMouseDragStop.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
 
-    if (options.closable) {
-      this.viewContainer.appendChild(this.closeButton);
+    this.createDialogBase();
+    this.title = '';
+
+    this.services.appStateService.addEventListener(AppStateEvent.DialogOrderChanged, this.onDialogOrderChange.bind(this));
+
+    if (!options.closable) {
+      this.closeButton.style.display = 'none';
     }
-    this.viewContainer.appendChild(this.titleContainer);
-    this.viewContainer.appendChild(this.contentContainer);
+
+    this.viewContainer.addEventListener('mousedown', () => {
+      if (this.services.appStateService.selectedDialog !== this) {
+        this.services.appStateService.selectedDialog = this;
+      }
+    });
 
     this.closeButton.addEventListener('click', () => this.isVisible = false);
   }
 
+  /**
+   * Toggles the visibility of the dialog
+   */
+  public toggle(): void {
+    this.isVisible = !this.isVisible;
+  }
+
+  // Private methods
   protected afterViewCreated() {
     this.viewContainer.querySelectorAll('.drag-handle').forEach(element => {
       element.addEventListener('mousedown', this.onMouseDragStart.bind(this));
     });
   }
 
-  public toggle(): void {
-    this.isVisible = !this.isVisible;
+  private onDialogOrderChange(evt: CustomEvent<DialogBase[]>) {
+    const zPosition = evt.detail.indexOf(this) + 1;
+    this.viewContainer.style.zIndex = zPosition.toString(10);
+
+    if (zPosition === evt.detail.length) {
+      this.viewContainer.classList.add('dialog--focus');
+    } else {
+      this.viewContainer.classList.remove('dialog--focus');
+    }
   }
 
+  private createDialogBase() {
+    this.viewContainer.appendChild(this.closeButton);
+    this.viewContainer.appendChild(this.titleContainer);
+    this.viewContainer.appendChild(this.contentContainer);
+  }
+
+  // Convenience methods for subclasses
   protected appendChild(element: HTMLElement): void {
     this.contentContainer.appendChild(element);
   }
 
+  // Event listeners for drag handling
   private onMouseDragStart(evt: MouseEvent): void {
     if (evt.button !== 0) {
       return;
@@ -80,13 +128,20 @@ export abstract class DialogBase {
     document.addEventListener('mousemove', this.onMouseMove);
     document.addEventListener('mouseup', this.onMouseDragStop);
 
+    if (!this.position) {
+      this.position = [
+        this.viewContainer.clientLeft,
+        this.viewContainer.clientTop
+      ]
+    }
+
     this.lastMousePosition = [ evt.clientX, evt.clientY ];
   }
 
   private onMouseMove(evt: MouseEvent): void {
     evt.preventDefault();
 
-    const { clientLeft, clientTop } = this.viewContainer;
+    const { offsetLeft, offsetTop } = this.viewContainer;
 
     // Get difference between last and new position in pixels
     const [ oldX, oldY ] = this.lastMousePosition;
@@ -95,8 +150,8 @@ export abstract class DialogBase {
     this.lastMousePosition = [ clientX, clientY ];
 
     // Set position
-    this.viewContainer.style.left = (clientX) + 'px';
-    this.viewContainer.style.top = (clientY) + 'px';
+    this.viewContainer.style.left = (offsetLeft - diffX) + 'px';
+    this.viewContainer.style.top = (offsetTop - diffY) + 'px';
   }
 
   private onMouseDragStop(evt: MouseEvent): void {

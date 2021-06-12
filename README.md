@@ -1,31 +1,41 @@
-# Typescript Starter
-A very simple and basic Typescript Starter boilerplate template based on npm.
+# ACT Rotation Hero
+
+This is a free open source tool to practice your rotation inside and outside of FFXIV.
+
+To give this tool a try, head over to https://sargodarya.github.io/act-rotation-hero/ to practice in the browser or use this URL as overlay in ACT to practice directly in game.
+
+Note: When talking about the **full** browser version, just opening the URL in the browser is meant. This is completely free.
 
 ## Features
-* Just npm *(no gulp, grunt or others)*
-* Compiles and watches Typescript sources
-* Compiles and watches SCSS sources
-* Includes css, js, png, jpg, gif and html sources
-* Keeps the original file structure
-* Includes browser-sync for a local setup
-* *No browsersify, uglify, lint, testing etc. (at least for now)*
 
-## Latest Versions
-* 1.0.0
-  * Initial starter boilerplate template
+### Rotation hero overlay
 
-# Getting started
-First clone this repository
-```
-git clone https://github.com/nea/Typescript-Starter.git <project_name>
-```
-or download the [zip][1] and extract it.
+* ACT Overlay Support (just include the URL)
+* Community rotation presets for each discipile of war
+* Customisable rotations with repeatable steps
+* (Planned) Different training modes to increase efficiency in learning
 
-Change into the cloned/extracted directory and install the dependencies
-```
-npm install
-```
-  
+### Full browser version
+
+* Massive full version with simulated UI
+* Hotbar customisation (1x12, 2x6, 3x4, 4x3, 6x2, 12x1, Scaling, Visibility)
+* Drag/Drop of actions
+* Persistent hotbars layout and allocation
+* Persistent Key bindings
+* Rotation Recorder / action history
+* (Partial) Support for gamepads
+* (Partial) Cross hotbars
+* (Planned) Combo indicators
+* (Planned) Movement simulator for directionals and dodging practice
+* (Evaluating) Drag/Drop of HOTBAR.DAT for automatic hotbar allocation
+
+# Development
+
+The primary development focusses on acting as ACT overlay. The browser version is mainly there to support players who for any
+can't run ACT and thus need to practice outside of the game.
+
+This is at the moment a frontend only project running entirely on typescript and written without any framework.
+
 ## Usage
 Start developing in the **src/** directory. The structure will be preserved and all files and compilations are copied to the output directory **bin/**.
 
@@ -50,18 +60,10 @@ Run a local server
 npm run serve
 ```
 
-## Configuration
-You can check the *package.json* and *tsconfig.json* and alter them to your needs. For example, if you like to change the output directory, you would have to change all occurrences in these two files.
+# License
 
-For more information check out the [tsconfig.json][2] and [package.json][3] documentation.
+This project is licensed under MIT.
 
-## Disclaimer
-This source and the whole package comes without warranty. It may or may not harm your computer or cell phone. Please use with care. Any damage cannot be related back to the author. The source has been tested on a virtual environment and scanned for viruses and has passed all tests.
+# Disclaimer
 
-## Personal Note
-*I don't know if this is very useful for a lot of people but I was looking for a very simple and basic Typescript Starter template without any grunt, gulp, browsersify, uglify etc. Those are all very sane and good systems and dependencies, but to just get started may overwhelm some people. Therefore, I created an absolute basic compiler/copy system to just get started. I hope this proves useful to you... with all its Bugs and Issues ;) If you like it you can give me a shout at [INsanityDesign][4] or let me know via this repository.*
-
-  [1]: https://github.com/nea/Typescript-Starter/archive/master.zip
-  [2]: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-  [3]: https://docs.npmjs.com/files/package.json
-  [4]: https://insanitydesign.com
+Square Enix, Final Fantasy, Final Fantasy XIV, Final Fantasy XIV: Heavensward, Final Fantasy XIV: Stormblood, and all associated logos and designs are trademarks or registered trademarks of Square Enix Holdings Co., Ltd.

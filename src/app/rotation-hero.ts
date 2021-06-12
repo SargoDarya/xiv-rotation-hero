@@ -1,5 +1,6 @@
+import { Services } from "./interfaces.js";
 import { GameDataService } from "./services/game-data.service.js";
-import { createView } from "./utils.js";
+import { createSelect, createView } from "./utils.js";
 
 interface Rotation {
   actions: number[],
@@ -7,37 +8,31 @@ interface Rotation {
   repeatable?: boolean
 }
 
-interface RotationSet {
+export interface RotationSet {
   title: string;
+  classJobId: number;
   rotations: Rotation[];
 }
 
 export class RotationHero {
   public viewContainer = createView('div', 'rotation-hero');
 
-  public rotationSet: RotationSet = {
-    title: 'Higanbana 1st',
-    rotations: [
-      {
-        actions: [ 7477, 7478, 7479, 7480, 7481 ],
-        title: 'Opener'
-      },
-      {
-        actions: [ 7477, 7478, 7479, 7480, 7481 ],
-        title: 'Cooldown Phase',
-        repeatable: true
-      },
-      {
-        actions: [ 7477, 7478, 7479, 7480, 7481 ],
-        title: 'Burst Phase',
-        repeatable: true
-      }
-    ]
-  };
-  public blindModeEnabled = false;
-  public iteration = 0;
-  public rotationsContainer = createView('div', 'rotation-hero__rotations');
-  public rotationViews: RotationView[];
+  private rotationSet: RotationSet | null;
+  private rotationPresets: RotationSet[] = [];
+  private rotationsContainer = createView('div', 'rotation-hero__rotations');
+  private presetContainer = <HTMLSelectElement>createView('select', 'rotation-hero__preset-select');
+  private rotationViews: RotationView[];
+  private currentClassJobId: number;
+
+  private readonly gameDataService: GameDataService;
+
+  public _iteration = 0;
+  public set iteration(iteration: number) {
+    this._iteration = iteration;
+  }
+  public get iteration(): number {
+    return this._iteration;
+  }
 
   private _currentRotationIndex = 0;
   public set currentRotationIndex(value: number) {
@@ -59,9 +54,11 @@ export class RotationHero {
   }
 
   constructor(
-    private readonly gameDataService: GameDataService,
+    private readonly services: { gameDataService: GameDataService },
     isEmbedded: boolean = true
   ) {
+    this.gameDataService = services.gameDataService;
+
     this.viewContainer.innerHTML = `
       <div class="rotation-hero__title-bar drag-handle">
         <div class="rotation-hero__title">Rotation Hero</div>
@@ -69,17 +66,16 @@ export class RotationHero {
       </div>
     `;
 
+    this.viewContainer.appendChild(this.presetContainer);
+    this.presetContainer.addEventListener('change', () => {
+      this.selectRotationSet(this.rotationPresets[parseInt(this.presetContainer.value)] || null);
+    });
+
+    this.setPresets(this.gameDataService.getRotationPresets());
+
     this.viewContainer.appendChild(this.rotationsContainer);
 
-    this.rotationViews = this.rotationSet.rotations.map(
-      (rotation) => new RotationView(this.gameDataService, rotation)
-    );
-    this.rotationViews.forEach(
-      (view) => this.viewContainer.appendChild(view.viewContainer)
-    );
-
-    this.rotationViews[ 0 ].isActive = true;
-    this.rotationViews[ 0 ].activeActionIndex = 0;
+    this.resetView();
 
     if (!isEmbedded) {
       this.viewContainer.style.maxWidth = '400px';
@@ -87,11 +83,68 @@ export class RotationHero {
     }
   }
 
+  public setCurrentClassJobId(classJobId: number) {
+    this.currentClassJobId = classJobId;
+    this.updatePresets();
+    this.selectRotationSet(null);
+  }
+
+  public setPresets(presets: RotationSet[]) {
+    this.rotationPresets = presets;
+    this.updatePresets();
+  }
+
+  private updatePresets() {
+    this.presetContainer.innerHTML = '';
+
+    const availablePresetForCurrentJob = this.rotationPresets.filter((preset) => preset.classJobId === this.currentClassJobId)
+
+    const emptyOption = document.createElement('option');
+    emptyOption.label = availablePresetForCurrentJob.length ? 'Select a preset' : 'No presets available :(';
+    this.presetContainer.disabled = availablePresetForCurrentJob.length === 0;
+    this.presetContainer.appendChild(emptyOption);
+
+    availablePresetForCurrentJob
+      .forEach((preset, i) => {
+        const opt = document.createElement('option');
+        opt.value = i.toString();
+        opt.label = `${preset.title}`;
+        this.presetContainer.appendChild(opt);
+      });
+  }
+
+  public selectRotationSet(rotationSet: RotationSet | null) {
+    this.rotationSet = rotationSet;
+    this.resetView();
+  }
+
+  public resetView() {
+    this.rotationsContainer.innerHTML = '';
+
+    if (this.rotationSet) {
+      this.rotationViews = this.rotationSet.rotations.map(
+        (rotation) => new RotationView(this.gameDataService, rotation)
+      );
+      this.rotationViews.forEach(
+        (view) => this.rotationsContainer.appendChild(view.viewContainer)
+      );
+
+      this.rotationViews[ 0 ].isActive = true;
+      this.rotationViews[ 0 ].activeActionIndex = 0;
+    } else {
+      // Show empty view for now
+    }
+  }
+
   public recordAction(actionId: number) {
+    if (!this.rotationSet) { return; }
+
     const currentRotation: Rotation = this.rotationSet.rotations[ this.currentRotationIndex ];
 
     if (currentRotation.actions[ this.currentActionIndex ] === actionId) {
       this.currentActionIndex++;
+
+      this.rotationViews[ this.currentRotationIndex ]
 
       if (this.currentActionIndex === currentRotation.actions.length) {
         this.currentActionIndex = 0;
@@ -117,7 +170,6 @@ export class RotationHero {
 }
 
 class RotationView {
-
   public readonly viewContainer = createView('div', 'rotation-hero__rotation');
   private readonly rotationTitleContainer = createView('div', 'rotation-hero__rotation-title');
   private readonly rotationActionCounterContainer = createView('div', 'rotation-hero__action-counter');
@@ -145,6 +197,7 @@ class RotationView {
 
     if (typeof activeActionIndex === 'number') {
       this.rotationActionCounterContainer.innerText = `${activeActionIndex}/${this.rotation.actions.length}`;
+      this.actionsContainer.style.left = (20-(<HTMLElement>this.actionsContainer.children[ activeActionIndex ]).offsetLeft) + 'px';
     }
     this._activeActionIndex = activeActionIndex;
   }
@@ -195,5 +248,4 @@ class RotationView {
 
     this.activeActionIndex = 0;
   }
-
 }

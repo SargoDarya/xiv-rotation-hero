@@ -1,16 +1,23 @@
 import { DialogBase } from "./dialog-base.js";
-import { HotbarService } from "../services/hotbar.service.js";
 import { HotbarStyle } from "../hotbar.js";
-import { createCheckbox, createInput, createRadio, createSelect, createView, wrapForStyle } from "../utils.js";
+import { createCheckbox, createRadio, createSelect, createView, wrapForStyle } from "../utils.js";
+import { Services } from "../interfaces.js";
 
 export class HotbarLayoutDialog extends DialogBase {
+  public uiTitle = 'Hotbar Layout';
+
   constructor(
-    private readonly hotbarManager: HotbarService
+    services: Services
   ) {
-    super();
+    super(services);
 
     this.title = 'Hotbar Layout';
 
+    this.createView();
+    this.afterViewCreated();
+  }
+
+  protected createView() {
     const hotbarSettings = document.createElement('table');
 
     hotbarSettings.appendChild(this.createHeaderRow([
@@ -25,12 +32,12 @@ export class HotbarLayoutDialog extends DialogBase {
       'Size'
     ]));
 
-    this.hotbarManager.hotbars.forEach((hotbar, i) => {
+    this.services.hotbarService.hotbars.forEach((hotbar, i) => {
       const visibilityCheckbox = createCheckbox('checkbox', `hotbar__visibility--${i}`);
       visibilityCheckbox.checked = hotbar.visible;
       visibilityCheckbox.addEventListener('change', (ev) => {
         hotbar.visible = visibilityCheckbox.checked;
-        this.hotbarManager.persistSettings();
+        this.services.hotbarService.persistSettings();
       });
       const hotbarName = createView('span', `hotbar__name--${i}`);
       hotbarName.innerText = 'Hotbar ' + (i + 1);
@@ -58,7 +65,7 @@ export class HotbarLayoutDialog extends DialogBase {
       sizeSelect.addEventListener('change', (evt) => {
         if (evt.target && (<HTMLSelectElement>evt.target).value) {
           hotbar.scale = Number((<HTMLSelectElement>evt.target).value);
-          this.hotbarManager.persistSettings();
+          this.services.hotbarService.persistSettings();
         }
       });
 

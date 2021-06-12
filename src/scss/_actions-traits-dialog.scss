@@ -1,0 +1,20 @@
+.actions-traits-dialog {
+  display: flex;
+  flex-wrap: wrap;
+  width: 600px;
+
+  &__action {
+    flex-basis: 1/3;
+    clear: both;
+    width: 200px;
+    box-sizing: border-box;
+    padding: 10px;
+  }
+
+  &__action-icon {
+    width: 40px;
+    height: 40px;
+    float: left;
+    margin-right: 10px;
+  }
+}
