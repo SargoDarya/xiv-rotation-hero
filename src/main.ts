@@ -1,6 +1,6 @@
 import { CommunicationLayer, LogLineEvent } from "./app/services/communication-layer.js";
 import { OverlayPluginLayer } from "./app/services/overlay-plugin-layer.js";
-import { RotationHero } from "./app/rotation-hero.js";
+import { RotationHero } from "./app/rotation-hero/rotation-hero.js";
 import { WebsocketLayer } from "./app/services/websocket-layer.js";
 import { GameDataService } from "./app/services/game-data.service.js";
 
@@ -38,6 +38,7 @@ export class ACTRotationTrainer {
       // loading unnecessary scripts.
       import('./app/manual-ui.js').then(({ ManualUI }) => {
         const manualUI = new ManualUI(this.gameDataService);
+        document.body.appendChild(manualUI.viewContainer);
         manualUI.startTicking();
       });
     } else {
@@ -54,11 +55,11 @@ export class ACTRotationTrainer {
         }
 
         switch(evt.line[0]) {
-          case '12': 
+          case '12':
             console.log(`Role changed to ${evt.line[2]}`);
             rotationHero.setCurrentClassJobId(Number(evt.line[2]));
             break;
-          
+
           case '20':
             // Casting
 
@@ -68,7 +69,7 @@ export class ACTRotationTrainer {
 
             rotationHero.recordAction(parseInt(evt.line[4], 16));
             break;
-          
+
           case '14':
             // status effect removed
 

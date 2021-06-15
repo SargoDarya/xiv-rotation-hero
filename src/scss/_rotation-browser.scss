@@ -1,0 +1,81 @@
+.rotation-browser {
+
+  &__tab-bar {
+    padding: 0 12px;
+
+    &--primary { background: #262626; font-size: 14px; }
+    &--secondary { background: #353535; font-size: 11px; }
+  }
+
+  &__button {
+    background: none;
+    border: none;
+    color: #2f79a3;
+    cursor: pointer;
+    padding: 6px 0px;
+    margin-right: 12px;
+    font-size: inherit;
+
+    &:focus,
+    &:hover {
+      // background: rgba(255, 255, 255, 0.2);
+      color: lighten(#2f79a3, 20%);
+    }
+
+    &:active {
+      color: lighten(#2f79a3, 40%);
+    }
+
+    &--selected {
+      color: lighten(#2f79a3, 30%);
+    }
+  }
+
+  &__list-item {
+    display: grid;
+    padding: 8px 12px;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'img title favourites'
+      'img subtitle favourites';
+    background: #323232;
+    cursor: pointer;
+
+    &:nth-child(odd) {
+      background: #262626;
+    }
+
+    &:hover {
+      background: #424242;
+    }
+  }
+
+  &__list-item-image {
+    width: 32px;
+    height: 32px;
+    grid-area: img;
+    margin-right: 8px;
+  }
+
+  &__list-item-title {
+    font-size: 12px;
+    color: #e1e1e1;
+    grid-area: title;
+    line-height: 1.5;
+  }
+
+  &__list-item-subtitle {
+    font-size: 10px;
+    color: #a8a8a8;
+    grid-area: subtitle;
+    line-height: 1.5;
+  }
+
+  &__list-item-favourites {
+    font-size: 12px;
+    color: #e1e1e1;
+    grid-area: favourites;
+  }
+
+}

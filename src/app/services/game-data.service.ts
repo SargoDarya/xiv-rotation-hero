@@ -1,11 +1,10 @@
 import { Action, Job } from "../interfaces";
-import { RotationSet } from "../rotation-hero";
 
 export class GameDataService extends EventTarget {
   private actionsById: { [ actionId: number ]: Action } = {};
   private actionsByClassJob: { [ classJobId: string ]: Action[] } = {};
   private classJobs: Job[] = [];
-  private rotationPresets: RotationSet[];
+  private classJobsById: Map<number, Job> = new Map();
 
   async load() {
     // Load game data
@@ -15,10 +14,12 @@ export class GameDataService extends EventTarget {
         .then(this.registerActions.bind(this)),
       fetch('./assets/classjobs.json')
         .then(response => response.json())
-        .then((response) => this.classJobs = response),
-      fetch('./assets/rotation-presets.json')
-        .then(response => response.json())
-        .then((response) => this.rotationPresets = response)
+        .then((response: Job[]) => {
+          this.classJobs = response;
+          response.map((job) => {
+            this.classJobsById.set(job.ID, job);
+          })
+        }),
     ]);
 
     this.dispatchEvent(new CustomEvent('gamedataloaded'));
@@ -36,8 +37,20 @@ export class GameDataService extends EventTarget {
     return this.classJobs;
   }
 
-  getRotationPresets() {
-    return this.rotationPresets;
+  getClassJob(classJobID: number): Job | undefined {
+    return this.classJobsById.get(classJobID);
+  }
+
+  getClassJobIcon(classJobID: number) {
+    const classJob = this.getClassJob(classJobID);
+
+    return classJob ? classJob.Icon : classJob
+  }
+
+  getClassJobAbbreviation(classJobID: number) {
+    const classJob = this.getClassJob(classJobID);
+
+    return classJob ? classJob.Abbreviation : classJob
   }
 
   private registerActions(actions: { [ classJobId: string ]: Action[] }): void {

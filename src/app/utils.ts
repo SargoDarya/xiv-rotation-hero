@@ -1,6 +1,9 @@
 export function createView(type: string, ...classNames: string[]): HTMLElement {
   const view = document.createElement(type);
-  view.classList.add(...classNames);
+  if (classNames.length) {
+    // Filter out empty classes
+    view.classList.add(...classNames.filter((str) => str));
+  }
   return view;
 }
 

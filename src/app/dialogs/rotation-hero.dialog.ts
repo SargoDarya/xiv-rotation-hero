@@ -1,5 +1,5 @@
 import { DialogBase } from "./dialog-base.js";
-import { RotationHero } from "../rotation-hero.js";
+import { RotationHero } from "../rotation-hero/rotation-hero.js";
 import { Action, Services } from "../interfaces.js";
 import { AppStateEvent } from "../services/app-state.service.js";
 
@@ -23,6 +23,10 @@ export class RotationHeroDialog extends DialogBase {
     this.isVisible = true;
 
     this.contentContainer.appendChild(this.rotationHero.viewContainer);
+
+    this.rotationHero.addEventListener('app-changeclassjob', (evt: CustomEvent<number>) => {
+      this.services.appStateService.selectedClassJobID = evt.detail;
+    });
 
     this.services.actionService.addEventListener('trigger', (evt: CustomEvent<Action>) => {
       this.rotationHero.recordAction(evt.detail.ID);

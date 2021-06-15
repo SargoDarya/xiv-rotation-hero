@@ -25,7 +25,7 @@ export class AppStateService extends EventTarget implements ServiceBase {
 
   private readonly _dialogOrder: DialogBase[] = [];
   public set selectedDialog(dialog: DialogBase) {
-    // Move dialog to last position
+    // Move dialog to last z-order
     const currentPosition = this._dialogOrder.indexOf(dialog);
     this._dialogOrder.splice(currentPosition);
     this._dialogOrder.push(dialog);

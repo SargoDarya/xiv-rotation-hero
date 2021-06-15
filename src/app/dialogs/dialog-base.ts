@@ -1,13 +1,13 @@
 import { Services } from "../interfaces.js";
 import { AppStateEvent } from "../services/app-state.service.js";
 import { createView } from "../utils.js";
+import { WidgetBase } from '../widgets/widget-base.js';
 
 class DialogDefaults {
   closable: boolean = true;
   resizable: boolean = false;
 }
-export abstract class DialogBase {
-  public viewContainer = createView('div', 'dialog');
+export abstract class DialogBase extends WidgetBase {
   public contentContainer = createView('div', 'dialog__content');
   private closeButton = createView('button', 'dialog__close-button');
   private titleContainer = createView('div', 'dialog__title', 'drag-handle');
@@ -59,6 +59,8 @@ export abstract class DialogBase {
   }
 
   constructor(services: Services, options: DialogDefaults = new DialogDefaults()) {
+    super('dialog');
+
     this.services = services;
     this.onMouseDragStop = this.onMouseDragStop.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);

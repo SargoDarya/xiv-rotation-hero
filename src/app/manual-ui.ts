@@ -11,9 +11,12 @@ import { ActionsTraitsDialog } from "./dialogs/actions-traits.dialog.js";
 import { Services } from "./interfaces.js";
 import { ServiceBase } from "./services/service-base.js";
 import { AppStateService } from "./services/app-state.service.js";
-import { DialogBase } from './dialogs/dialog-base';
-export class ManualUI extends EventTarget {
+import { DialogBase } from './dialogs/dialog-base.js';
+import { WidgetBase } from './widgets/widget-base.js';
+import { ContainerWidget } from './widgets/container-widget.js';
+import { ButtonWidget } from './widgets/button-widget.js';
 
+export class ManualUI extends WidgetBase {
   private readonly services: Partial<Services> = {};
 
   // Services
@@ -36,7 +39,7 @@ export class ManualUI extends EventTarget {
   private readonly rotationBuilderDialog: RotationBuilderDialog;
 
   constructor(gameDataService: GameDataService) {
-    super();
+    super('manual-ui', 'div');
 
     // Create all the services
     this.services.actionService = new ActionService(<Services>this.services);
@@ -70,49 +73,50 @@ export class ManualUI extends EventTarget {
     this.rotationBuilderDialog = new RotationBuilderDialog(<Services>this.services);
 
     // Running in non-embedded mode, show more UI
-    this.createManualUI();
+    this.createView();
   }
 
   public startTicking() {
     this.tick();
   }
 
-  private createManualUI() {
+  private createView() {
+    const toolbarWidget = new ContainerWidget('toolbar');
+    this.append(toolbarWidget);
+
+    // Create nicer class selection here
+
+
     // Create toolbar
-    const toolbar = createView('div', 'toolbar');
-    document.body.appendChild(toolbar);
+    // const toolbar = createView('div', 'toolbar');
+    // document.body.appendChild(toolbar);
 
     // Create job selection
-    const select = document.createElement('select');
-    const emptyOption = document.createElement('option');
-    emptyOption.label = 'Select class';
-    emptyOption.value = '-1';
-    select.appendChild(emptyOption);
+    // const select = document.createElement('select');
+    // const emptyOption = document.createElement('option');
+    // emptyOption.label = 'Select class';
+    // emptyOption.value = '-1';
+    // select.appendChild(emptyOption);
 
-    const jobOptions = this.gameDataService.getClassJobs()
-      .filter((job) => job.BattleClassIndex !== '-1' && job.Abbreviation !== '')
-      .map((job) => {
-        const option = document.createElement(`option`)
-        option.value = job.ID.toString();
-        option.text = job.Abbreviation;
-        option.selected = job.ID === this.appStateService.selectedClassJobID;
-        return option;
-      });
-    jobOptions.forEach((option) => select.appendChild(option));
-    select.addEventListener('change', () => this.selectClassJob(parseInt(select.value, 10)));
-    toolbar.appendChild(select);
+    // const jobOptions = this.gameDataService.getClassJobs()
+    //   .filter((job) => job.BattleClassIndex !== '-1' && job.Abbreviation !== '')
+    //   .map((job) => {
+    //     const option = document.createElement(`option`)
+    //     option.value = job.ID.toString();
+    //     option.text = job.Abbreviation;
+    //     option.selected = job.ID === this.appStateService.selectedClassJobID;
+    //     return option;
+    //   });
+    // jobOptions.forEach((option) => select.appendChild(option));
+    // select.addEventListener('change', () => this.selectClassJob(parseInt(select.value, 10)));
+    // toolbar.appendChild(select);
 
     // Instantiate dialogs
     this.DIALOGS.forEach((dialogClass) => {
       const dialogInstance = new dialogClass(<Services>this.services);
 
-      const toolbarButton = <HTMLButtonElement>createView('button', 'toolbar__button');
-      toolbarButton.innerText = dialogInstance.uiTitle;
-      toolbarButton.addEventListener('click', () => {
-        dialogInstance.toggle();
-      });
-
-      toolbar.appendChild(toolbarButton);
+      const toolbarButtonWidget = new ButtonWidget(dialogInstance.uiTitle, 'toolbar__button', { click: dialogInstance.toggle.bind(dialogInstance) });
+      toolbarWidget.append(toolbarButtonWidget);
       document.body.appendChild(dialogInstance.viewContainer);
     });
   }
