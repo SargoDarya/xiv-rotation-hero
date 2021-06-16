@@ -1,8 +1,7 @@
 import { Rotation } from './rotation-hero/interfaces';
 
 export class API {
-  // private static readonly API_BASE_URL = 'https://api.xivrotationhero.com';
-  private static readonly API_BASE_URL = 'http://localhost:8083';
+  private static readonly API_BASE_URL = 'https://api.xivrotatiohero.com';
 
   // AUTH
 
