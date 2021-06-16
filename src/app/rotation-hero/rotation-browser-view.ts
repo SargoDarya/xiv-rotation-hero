@@ -28,8 +28,15 @@ export class RotationBrowserView extends WidgetBase {
   private mainTabBarWidgets: ButtonWidget[];
   private secondaryTabBarWidgets: ButtonWidget[];
 
+  private userToken?: string;
+
   constructor(private readonly gameDataService: GameDataService) {
     super('rotation-browser');
+
+    const userTokenMatch = window.location.search.match(/[\?&]token=([^&]+)/);
+    if (userTokenMatch) {
+      this.userToken = userTokenMatch[ 1 ];
+    }
 
     this.mainTabBarWidgets = [
       new ButtonWidget('Community', 'rotation-browser__button', { click: this.selectBrowserCategory.bind(this, RotationBrowserCategoryType.Community, RotationBrowserSubCategoryType.Favorites )}),
@@ -86,13 +93,8 @@ export class RotationBrowserView extends WidgetBase {
         }
         break
 
-      case RotationBrowserCategoryType.Favourites:
-        rotations = await API.userFavourites();
-        break;
-
-      case RotationBrowserCategoryType.Mine:
-        rotations = await API.userFavourites();
-        break;
+      case RotationBrowserCategoryType.Favourites: rotations = await this.getUserFavorites(); break;
+      case RotationBrowserCategoryType.Mine: rotations = await this.getUserRotations(); break;
     }
 
     if (rotations && rotations.length) {
@@ -101,6 +103,18 @@ export class RotationBrowserView extends WidgetBase {
 
     // TODO: Hide loading symbol
 
+  }
+
+  private getUserRotations() {
+    return this.userToken
+      ? API.userTokenRotations(this.userToken)
+      : API.userRotations();
+  }
+
+  private getUserFavorites() {
+    return this.userToken
+      ? API.userTokenFavourites(this.userToken)
+      : API.userFavourites();
   }
 
   private fillRotationList(rotations: Rotation[]) {
@@ -124,7 +138,7 @@ export class RotationBrowserView extends WidgetBase {
         [
           new ImageWidget(`https://xivapi.com${classJob.Icon}`, 'rotation-browser__list-item-image'),
           new TextWidget(`${rotation.title}`, 'rotation-browser__list-item-title'),
-          new TextWidget(`${classJob ? classJob.Abbreviation : rotation.classJobId} | 80 | Patch: ${rotation.patch}`, 'rotation-browser__list-item-subtitle'),
+          new TextWidget(`${classJob ? classJob.Abbreviation : rotation.classJobId} | 80 | Patch: ${rotation.patch} | ${rotation.user.username}`, 'rotation-browser__list-item-subtitle'),
           new TextWidget(`${rotation.favouriteCount}`, 'rotation-browser__list-item-favourite'),
         ])
     });

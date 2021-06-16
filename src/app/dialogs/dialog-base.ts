@@ -91,7 +91,7 @@ export abstract class DialogBase extends WidgetBase {
   }
 
   // Private methods
-  protected afterViewCreated() {
+  public afterViewCreated() {
     this.viewContainer.querySelectorAll('.drag-handle').forEach(element => {
       element.addEventListener('mousedown', this.onMouseDragStart.bind(this));
     });

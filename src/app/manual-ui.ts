@@ -3,7 +3,6 @@ import { HotbarLayoutDialog } from "./dialogs/hotbar-layout.dialog.js";
 import { HotbarService } from "./services/hotbar.service.js";
 import { KeyBindingService } from "./services/key-binding.service.js";
 import { RotationHeroDialog } from "./dialogs/rotation-hero.dialog.js";
-import { createView } from "./utils.js";
 import { RotationBuilderDialog } from "./dialogs/rotation-builder.dialog.js";
 import { GameDataService } from "./services/game-data.service.js";
 import { GamepadService } from "./services/gamepad.service.js";
@@ -15,6 +14,7 @@ import { DialogBase } from './dialogs/dialog-base.js';
 import { WidgetBase } from './widgets/widget-base.js';
 import { ContainerWidget } from './widgets/container-widget.js';
 import { ButtonWidget } from './widgets/button-widget.js';
+import { SigninSignupDialog } from './dialogs/signin-signup.dialog.js';
 
 export class ManualUI extends WidgetBase {
   private readonly services: Partial<Services> = {};
@@ -31,12 +31,9 @@ export class ManualUI extends WidgetBase {
     HotbarLayoutDialog,
     ActionsTraitsDialog,
     RotationHeroDialog,
-    RotationBuilderDialog
+    RotationBuilderDialog,
+    SigninSignupDialog
   ]
-  private readonly hotbarLayoutDialog: HotbarLayoutDialog;
-  private readonly commandsDialog: ActionsTraitsDialog;
-  private readonly rotationHeroDialog: RotationHeroDialog;
-  private readonly rotationBuilderDialog: RotationBuilderDialog;
 
   constructor(gameDataService: GameDataService) {
     super('manual-ui', 'div');
@@ -67,10 +64,10 @@ export class ManualUI extends WidgetBase {
     ]).forEach((service) => service.init());
 
     // Create dialogs
-    this.rotationHeroDialog = new RotationHeroDialog(<Services>this.services);
-    this.commandsDialog = new ActionsTraitsDialog(<Services>this.services);
-    this.hotbarLayoutDialog = new HotbarLayoutDialog(<Services>this.services);
-    this.rotationBuilderDialog = new RotationBuilderDialog(<Services>this.services);
+    // this.rotationHeroDialog = new RotationHeroDialog(<Services>this.services);
+    // this.commandsDialog = new ActionsTraitsDialog(<Services>this.services);
+    // this.hotbarLayoutDialog = new HotbarLayoutDialog(<Services>this.services);
+    // this.rotationBuilderDialog = new RotationBuilderDialog(<Services>this.services);
 
     // Running in non-embedded mode, show more UI
     this.createView();
@@ -85,7 +82,7 @@ export class ManualUI extends WidgetBase {
     this.append(toolbarWidget);
 
     // Create nicer class selection here
-
+    this.createJobSelectionView();
 
     // Create toolbar
     // const toolbar = createView('div', 'toolbar');
@@ -119,6 +116,10 @@ export class ManualUI extends WidgetBase {
       toolbarWidget.append(toolbarButtonWidget);
       document.body.appendChild(dialogInstance.viewContainer);
     });
+  }
+
+  private createJobSelectionView() {
+
   }
 
   private selectClassJob(classJobId: number) {

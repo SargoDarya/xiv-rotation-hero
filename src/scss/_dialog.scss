@@ -12,6 +12,7 @@
 
   &--focus {
     border: 2px solid goldenrod;
+    box-shadow: 0 5px 20px 10px rgba(0, 0, 0, 0.4);
   }
 
   &--visible {
@@ -19,16 +20,19 @@
   }
 
   &__title {
-    font-size: 24px;
-    color: white;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #414141;
     padding: 4px 12px;
+    line-height: 1.5;
+    font-weight: bold;
   }
 
   &__close-button {
     position: absolute;
-    right: 0;
-    top: 0;
+    right: 6px;
+    top: 2px;
     background: none;
     border: 0;
     padding: 0;
@@ -38,7 +42,6 @@
     &:after {
       content: "\2716";
       font-size: 24px;
-      color: gold;
       text-shadow: 0 0 2px black;
     }
   }
