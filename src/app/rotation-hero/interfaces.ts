@@ -21,6 +21,7 @@ export interface UserSignIn {
 
 export interface Rotation {
   classJobId: number,
+  createdAt: string,
   description: string,
   favouriteCount: number,
   id: string,

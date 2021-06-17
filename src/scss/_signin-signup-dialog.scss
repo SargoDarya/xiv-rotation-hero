@@ -1,0 +1,34 @@
+.signin-signup-dialog {
+  &__content {
+    padding: 12px;
+    display: flex;
+
+    form button {
+      display: block;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  &__title {
+    font-size: 18px;
+    margin: 0 0 12px;
+  }
+}
+
+.sign-in-view,
+.sign-up-view {
+  width: 100%;
+}
+
+.sign-in-form,
+.sign-up-form {
+  border-bottom: 1px solid white;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}

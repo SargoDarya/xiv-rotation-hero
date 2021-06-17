@@ -1,8 +1,8 @@
-import { ActionService } from "./services/action.service.js";
-import { HotbarService } from "./services/hotbar.service.js";
+import { ActionService } from "../services/action.service.js";
+import { HotbarService } from "../services/hotbar.service.js";
 import { HotbarSlot } from "./hotbar-slot.js";
-import { Action } from "./interfaces.js";
-import { createView } from "./utils.js";
+import { Action } from "../interfaces.js";
+import { createView } from "../utils.js";
 
 export enum HotbarStyle {
   Horizontal = '12x1',

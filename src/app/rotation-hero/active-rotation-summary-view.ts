@@ -2,6 +2,7 @@ import { WidgetBase } from '../widgets/widget-base.js';
 import { Rotation } from './interfaces.js';
 import { TextWidget } from '../widgets/text-widget.js';
 import { ButtonWidget } from '../widgets/button-widget.js';
+import { API } from '../api.js';
 
 export class ActiveRotationSummaryView extends WidgetBase {
   private _rotation: Rotation | null;
@@ -34,7 +35,11 @@ export class ActiveRotationSummaryView extends WidgetBase {
     );
   }
 
-  private toggleFavorite() {
+  private async toggleFavorite() {
+    if (this.rotation) {
+      const newFavoriteCount = await API.favoriteRotation(this.rotation.id)
+      this.favoritesButtonWidget.html = `${newFavoriteCount.favouriteCount} &#9829;`;
+    }
 
   }
 

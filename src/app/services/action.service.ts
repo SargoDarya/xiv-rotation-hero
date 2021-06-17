@@ -1,4 +1,4 @@
-import { HotbarSlot } from "../hotbar-slot";
+import { HotbarSlot } from "../manual-ui/hotbar-slot";
 import { Action, Services } from "../interfaces";
 import { ServiceBase } from "./service-base";
 

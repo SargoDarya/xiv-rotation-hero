@@ -1,8 +1,8 @@
 import { ActionService } from "./action.service.js";
-import { Hotbar, HotbarOptions, HotbarStyle } from "../hotbar.js";
+import { Hotbar, HotbarOptions, HotbarStyle } from "../manual-ui/hotbar.js";
 import { Action, Services } from "../interfaces.js";
 import { KeyBindingService } from "./key-binding.service.js";
-import { CrossHotbar } from "../cross-hotbar.js";
+import { CrossHotbar } from "../manual-ui/cross-hotbar.js";
 import { GamepadService } from "./gamepad.service.js";
 import { GameDataService } from "./game-data.service.js";
 import { ServiceBase } from "./service-base.js";

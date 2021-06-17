@@ -1,6 +1,6 @@
-import { Services } from "./interfaces.js";
-import { GamepadButtonState, PSGamepadButton } from "./services/gamepad.service.js";
-import { createView } from "./utils.js";
+import { Services } from "../interfaces.js";
+import { GamepadButtonState, PSGamepadButton } from "../services/gamepad.service.js";
+import { createView } from "../utils.js";
 
 enum CrossHotbarSide {
   Left,

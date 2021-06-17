@@ -6,7 +6,10 @@ import {
 import { ButtonWidget } from '../widgets/button-widget.js';
 import { ContainerWidget } from '../widgets/container-widget.js';
 import { Rotation } from './interfaces.js';
-import { API } from '../api.js';
+import {
+  API,
+  PaginatedResponse
+} from '../api.js';
 import { TextWidget } from '../widgets/text-widget.js';
 import { GameDataService } from '../services/game-data.service.js';
 import { ImageWidget } from '../widgets/image-widget.js';
@@ -23,12 +26,15 @@ export class RotationBrowserView extends WidgetBase {
   private readonly secondaryTabBar: ContainerWidget;
   private readonly rotationListView: ContainerWidget;
 
-  private visibleRotationViews: ContainerWidget[] = [];
+  private readonly visibleRotationViews: ContainerWidget[] = [];
 
-  private mainTabBarWidgets: ButtonWidget[];
-  private secondaryTabBarWidgets: ButtonWidget[];
+  private readonly mainTabBarWidgets: ButtonWidget[];
+  private readonly secondaryTabBarWidgets: ButtonWidget[];
 
-  private userToken?: string;
+  private readonly loadingTextWidget: TextWidget;
+  private readonly emptyViewTextWidget: TextWidget;
+
+  private readonly userToken?: string;
 
   constructor(private readonly gameDataService: GameDataService) {
     super('rotation-browser');
@@ -55,7 +61,12 @@ export class RotationBrowserView extends WidgetBase {
 
     this.rotationListView = new ContainerWidget('rotation-browser__list');
 
-    this.append(this.mainTabBar, this.secondaryTabBar, this.rotationListView);
+    this.emptyViewTextWidget = new TextWidget(`Looks like there's nothing here yet...`, 'rotation-browser__empty-view');
+    this.emptyViewTextWidget.hide();
+    this.loadingTextWidget = new TextWidget(Math.random() < 0.0001 ? `Rotating loadations` : 'Loading rotations', 'rotation-browser__loading-view');
+    this.loadingTextWidget.hide();
+
+    this.append(this.mainTabBar, this.secondaryTabBar, this.rotationListView, this.emptyViewTextWidget, this.loadingTextWidget);
 
     this.selectBrowserCategory(RotationBrowserCategoryType.Community, RotationBrowserSubCategoryType.Favorites);
   }
@@ -68,7 +79,8 @@ export class RotationBrowserView extends WidgetBase {
     this.activeBrowserCategory = category;
     this.activeBrowserSubCategory = subCategory;
 
-    // TODO: Show loading symbol
+    this.emptyViewTextWidget.hide();
+    this.loadingTextWidget.show();
 
     // Clear current list
     const replacedRotations = this.visibleRotationViews.splice(0, this.visibleRotationViews.length);
@@ -84,24 +96,30 @@ export class RotationBrowserView extends WidgetBase {
     }
 
     // Fetch rotations
-    let rotations: Rotation[] = [];
+    let rotations: PaginatedResponse<Rotation>;
     switch (category) {
-      case RotationBrowserCategoryType.Community:
-        switch(subCategory) {
-          case RotationBrowserSubCategoryType.Favorites: rotations = await API.getAllRotations(); break;
-          case RotationBrowserSubCategoryType.Recent: rotations = await API.getAllRotations(); break;
-        }
-        break
-
       case RotationBrowserCategoryType.Favourites: rotations = await this.getUserFavorites(); break;
       case RotationBrowserCategoryType.Mine: rotations = await this.getUserRotations(); break;
+
+      case RotationBrowserCategoryType.Community:
+      default:
+        switch(subCategory) {
+          case RotationBrowserSubCategoryType.Recent: rotations = await API.getAllRotations({ sortBy: 'createdAt' }); break;
+
+          case RotationBrowserSubCategoryType.Favorites:
+          default: rotations = await API.getAllRotations({ sortBy: 'favouriteCount' }); break;
+        }
+        break;
     }
 
-    if (rotations && rotations.length) {
-      this.fillRotationList(rotations);
+    if (rotations && rotations.results && rotations.results.length) {
+      this.fillRotationList(rotations.results);
+    } else {
+      // Show empty view
+      this.emptyViewTextWidget.show();
     }
 
-    // TODO: Hide loading symbol
+    this.loadingTextWidget.hide();
 
   }
 
@@ -119,7 +137,7 @@ export class RotationBrowserView extends WidgetBase {
 
   private fillRotationList(rotations: Rotation[]) {
     const rotationViews = this.createRotationListItemView(rotations);
-    const replacedRotations = this.visibleRotationViews.splice(0, 0, ...rotationViews);
+    this.visibleRotationViews.splice(0, 0, ...rotationViews);
     rotationViews.forEach((rotation) => this.rotationListView.append(rotation));
   }
 

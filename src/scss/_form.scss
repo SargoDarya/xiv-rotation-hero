@@ -89,3 +89,32 @@ button {
     color: lighten(#2f79a3, 30%);
   }
 }
+
+.form {
+  &__input-container {
+    margin: 6px 0 12px;
+
+    & input {
+      display: block;
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+      border: 0;
+      outline: 0;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      line-height: 1.5;
+      width: 100%;
+      padding: 6px 8px;
+      box-sizing: border-box;
+
+      &:focus {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+      }
+    }
+
+    & label {
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+  }
+}

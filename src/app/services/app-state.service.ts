@@ -7,6 +7,10 @@ export enum AppStateEvent {
   DialogOrderChanged = 'app-dialogfocuschanged'
 }
 
+export enum AppStateKey {
+  SelectedClassJobID = 'selected-class-job-id'
+}
+
 /**
  * This class contains all application state and emits events
  * as any important actions in the application happen which need
@@ -16,7 +20,7 @@ export class AppStateService extends EventTarget implements ServiceBase {
   private _selectedClassJobID: number;
   public set selectedClassJobID(value: number) {
     this._selectedClassJobID = value;
-    localStorage.setItem('selectedClassJobId', value.toString());
+    localStorage.setItem(AppStateKey.SelectedClassJobID, value.toString());
     this.dispatchEvent(new CustomEvent(AppStateEvent.ClassJobChanged, { detail: value }));
   }
   public get selectedClassJobID() {
@@ -44,7 +48,7 @@ export class AppStateService extends EventTarget implements ServiceBase {
     super();
 
     // Initialise defaults and persistance here
-    this._selectedClassJobID = localStorage.getItem('selectedClassJobId') !== null ? Number(localStorage.getItem('selectedClassJobId')) : -1;
+    this._selectedClassJobID = localStorage.getItem(AppStateKey.SelectedClassJobID) !== null ? Number(localStorage.getItem(AppStateKey.SelectedClassJobID)) : -1;
   }
 
   init() {}

@@ -1,5 +1,5 @@
 import { DialogBase } from "./dialog-base.js";
-import { HotbarStyle } from "../hotbar.js";
+import { HotbarStyle } from "../manual-ui/hotbar.js";
 import { createCheckbox, createRadio, createSelect, createView, wrapForStyle } from "../utils.js";
 import { Services } from "../interfaces.js";
 

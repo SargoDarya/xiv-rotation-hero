@@ -1,6 +1,6 @@
 import { Hotbar } from "./hotbar.js";
-import { Action } from "./interfaces.js";
-import { createView } from "./utils.js";
+import { Action } from "../interfaces.js";
+import { createView } from "../utils.js";
 
 const RECAST_ANIMATION: any[] = [
   { backgroundPositionX: '0%' },

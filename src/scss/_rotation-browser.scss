@@ -7,12 +7,21 @@
     &--secondary { background: #353535; font-size: 11px; }
   }
 
+  &__loading-view,
+  &__empty-view {
+    text-align: center;
+    padding: 30px 0;
+    color: #BBB;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
   &__button {
     background: none;
     border: none;
     color: #2f79a3;
     cursor: pointer;
-    padding: 6px 0px;
+    padding: 6px 0;
     margin-right: 12px;
     font-size: inherit;
 
@@ -29,6 +38,11 @@
     &--selected {
       color: lighten(#2f79a3, 30%);
     }
+  }
+
+  &__list {
+    max-height: 200px;
+    overflow: auto;
   }
 
   &__list-item {

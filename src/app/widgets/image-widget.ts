@@ -8,7 +8,7 @@ export class ImageWidget extends WidgetBase {
     return (<HTMLImageElement>this.viewContainer).src;
   }
 
-  constructor(src: string, classNames: string) {
+  constructor(src: string, classNames: string = '') {
     super(classNames, 'img');
     this.src = src;
   }

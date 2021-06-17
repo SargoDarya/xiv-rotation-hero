@@ -1,16 +1,47 @@
 import { Rotation } from './rotation-hero/interfaces';
 
+interface QueryParams<T> extends Object {
+  sortBy?: keyof T
+  page?: number
+}
+
+interface RotationQueryParams extends QueryParams<Rotation> {
+  classJobId?: number;
+}
+
+interface FavouriteResponse {
+  favouriteCount: number
+}
+
+export interface PaginatedResponse<T> {
+  pagination: {
+    page: number,
+    pageTotal: number,
+    pageNext: number | null,
+    pagePrev: number | null,
+    results: number,
+    resultsPerPage: number,
+    resultsTotal: number
+  }
+  results: T[]
+}
+
 export class API {
-  private static readonly API_BASE_URL = 'https://api.xivrotatiohero.com';
+  private static readonly API_BASE_URL = 'https://api.xivrotationhero.com';
+  // private static readonly API_BASE_URL = 'http://localhost:8083';
 
   // AUTH
 
   static async signIn(email: string, password: string) {
-    return this.request('/auth/signIn', 'POST', JSON.stringify({ email, password })).then(response => response.json());
+    return this.request('/auth/login', 'POST', JSON.stringify({ email, password })).then(response => response.json());
   }
 
   static async signInWithToken(token: string) {
     return this.request('/auth/token', 'POST', JSON.stringify({ token })).then(response => response.json());
+  }
+
+  static async signUp(email: string, username: string, password: string) {
+    return this.request('/auth/signup', 'POST');
   }
 
   static async logout() {
@@ -26,33 +57,47 @@ export class API {
     return this.request(`/rotation/${rotationId}/publish`, 'POST').then(response => response.json());
   }
 
-  static async favoriteRotation(rotationId: string): Promise<string> {
-    return this.request(`/rotation/${rotationId}/favourite`, 'POST', '').then(response => response.text());
+  static async favoriteRotation(rotationId: string): Promise<FavouriteResponse> {
+    return this.request(`/rotation/${rotationId}/favourite`, 'POST', '').then(response => response.json());
   }
 
   static async getRotation(rotationId: string): Promise<Rotation> {
     return this.request(`/rotation/${rotationId}`, 'GET').then(response => response.json());
   }
 
-  static async getAllRotations(pageOffset: number = 0): Promise<Rotation[]> {
-    return this.request(`/rotation/`, 'GET').then(response => response.json());
+  static async getAllRotations(queryParams: RotationQueryParams = {}): Promise<PaginatedResponse<Rotation>> {
+    const paramArray = [];
+
+    if (queryParams.page) {
+      paramArray.push(`page=${queryParams.page}`);
+    }
+    if (queryParams.sortBy) {
+      paramArray.push(`sortBy=${queryParams.sortBy}`);
+    }
+    if (queryParams.classJobId) {
+      paramArray.push(`classJobId=${queryParams.classJobId}`);
+    }
+
+    const paramString = paramArray.length ? `?${paramArray.join('&')}` : '';
+
+    return this.request(`/rotation/${ paramString }`, 'GET').then(response => response.json());
   }
 
   // USER
-  static async userFavourites() {
+  static async userFavourites(): Promise<PaginatedResponse<Rotation>> {
     return this.request('/user/favourites', 'GET').then(response => response.json());
   }
 
-  static async userRotations() {
+  static async userRotations(): Promise<PaginatedResponse<Rotation>> {
     return this.request('/user/rotations', 'GET').then(response => response.json());
   }
 
   // Token
-  static async userTokenFavourites(token: string) {
+  static async userTokenFavourites(token: string): Promise<PaginatedResponse<Rotation>> {
     return this.request(`/token/${token}/favourites`, 'GET').then(response => response.json());
   }
 
-  static async userTokenRotations(token: string) {
+  static async userTokenRotations(token: string): Promise<PaginatedResponse<Rotation>> {
     return this.request(`/token/${token}/rotations`, 'GET').then(response => response.json());
   }
 
