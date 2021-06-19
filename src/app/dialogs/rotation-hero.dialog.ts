@@ -2,6 +2,7 @@ import { DialogBase } from "./dialog-base.js";
 import { RotationHero } from "../rotation-hero/rotation-hero.js";
 import { Action, Services } from "../interfaces.js";
 import { AppStateEvent } from "../services/app-state.service.js";
+import { Rotation } from '../rotation-hero/interfaces.js';
 
 export class RotationHeroDialog extends DialogBase {
   public uiTitle = 'Rotation Hero';
@@ -20,7 +21,7 @@ export class RotationHeroDialog extends DialogBase {
     );
 
     this.rotationHero = new RotationHero(this.services, false);
-    this.isVisible = true;
+    this.isVisible = false;
 
     this.contentContainer.appendChild(this.rotationHero.viewContainer);
 
@@ -34,6 +35,12 @@ export class RotationHeroDialog extends DialogBase {
 
     this.services.appStateService.addEventListener(AppStateEvent.ClassJobChanged, (evt: CustomEvent<number>) => {
       this.rotationHero.setCurrentClassJobId(evt.detail);
+    });
+
+    this.services.appStateService.addEventListener(AppStateEvent.TryRotation, (evt: CustomEvent<Rotation>) => {
+      this.rotationHero.selectRotation(evt.detail);
+      this.show();
+      this.focus();
     });
 
     if (this.services.appStateService.selectedClassJobID !== -1) {

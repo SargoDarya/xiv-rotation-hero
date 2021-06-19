@@ -1,3 +1,5 @@
+import { PhaseEnum } from './enums';
+
 export interface UserShort {
   id: string,
   username: string
@@ -34,6 +36,5 @@ export interface Rotation {
 
 export interface RotationPhase {
   actions: number[],
-  title: string,
-  repeatable?: boolean
+  phase: PhaseEnum
 }

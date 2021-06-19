@@ -1,10 +1,14 @@
-import { DialogBase } from "../dialogs/dialog-base";
-import { ServiceBase } from "./service-base";
+import { DialogBase } from "../dialogs/dialog-base.js";
+import { ServiceBase } from "./service-base.js";
+import { User } from '../rotation-hero/interfaces.js';
 
 
 export enum AppStateEvent {
   ClassJobChanged = 'app-classjobchanged',
-  DialogOrderChanged = 'app-dialogfocuschanged'
+  DialogOrderChanged = 'app-dialogfocuschanged',
+  TryRotation = 'app-tryrotation',
+  UserLogin = 'app-userlogin',
+  UserLogout = 'app-userlogout'
 }
 
 export enum AppStateKey {
@@ -15,6 +19,8 @@ export enum AppStateKey {
  * This class contains all application state and emits events
  * as any important actions in the application happen which need
  * to be propagated.
+ *
+ * This is also used as an event-bus
  */
 export class AppStateService extends EventTarget implements ServiceBase {
   private _selectedClassJobID: number;
@@ -40,8 +46,9 @@ export class AppStateService extends EventTarget implements ServiceBase {
     return [ ...this._dialogOrder ].reverse()[ 0 ];
   }
 
-  public registerDialog(dialog: DialogBase) {
-    this._dialogOrder.push(dialog);
+  private _loggedInUser: User | null;
+  public get loggedInUser() {
+    return this._loggedInUser;
   }
 
   constructor() {
@@ -49,6 +56,13 @@ export class AppStateService extends EventTarget implements ServiceBase {
 
     // Initialise defaults and persistance here
     this._selectedClassJobID = localStorage.getItem(AppStateKey.SelectedClassJobID) !== null ? Number(localStorage.getItem(AppStateKey.SelectedClassJobID)) : -1;
+
+    this.addEventListener(AppStateEvent.UserLogin, (evt: CustomEvent<User>) => {
+      this._loggedInUser = evt.detail;
+    });
+    this.addEventListener(AppStateEvent.UserLogout, (evt: CustomEvent<undefined>) => {
+      this._loggedInUser = null;
+    });
   }
 
   init() {}

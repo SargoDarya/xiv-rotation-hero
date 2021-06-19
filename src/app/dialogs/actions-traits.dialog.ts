@@ -2,11 +2,14 @@ import { Services } from "../interfaces.js";
 import { AppStateEvent } from "../services/app-state.service.js";
 import { DialogBase } from "./dialog-base.js";
 import { ContainerWidget } from '../widgets/container-widget.js';
-import { ImageWidget } from '../widgets/image-widget.js';
 import { TextWidget } from '../widgets/text-widget.js';
+import { ActionWidget } from '../widgets/action-widget.js';
+import { WidgetBase } from '../widgets/widget-base';
 
 export class ActionsTraitsDialog extends DialogBase {
   public uiTitle = 'Actions & Traits';
+  private readonly actionsContainer = new ContainerWidget('actions-traits-dialog__actions', {}, []);
+  private readonly actionsWidgets: WidgetBase[] = [];
 
   constructor(services: Services) {
     super(services);
@@ -20,11 +23,13 @@ export class ActionsTraitsDialog extends DialogBase {
       (evt: CustomEvent<number>) => this.updateViewForClassJobID(evt.detail)
     );
 
+    this.append(this.actionsContainer);
+
     this.updateViewForClassJobID(this.services.appStateService.selectedClassJobID);
   }
 
   updateViewForClassJobID(classJobId: number) {
-    this.contentContainer.innerHTML = '';
+    this.actionsContainer.remove(...this.actionsWidgets);
 
     if (classJobId === -1) {
       this.contentContainer.innerText = 'Select a Job to get started.';
@@ -32,17 +37,16 @@ export class ActionsTraitsDialog extends DialogBase {
     }
 
     const actions = [ ...this.services.gameDataService.getActionsByClassJobId(classJobId) ].sort((a, b) => a.ClassJobLevel - b.ClassJobLevel);
+    this.actionsWidgets.splice(0, this.actionsWidgets.length, ...actions.map((action) =>
+      new ContainerWidget('actions-traits-dialog__action', {}, [
+        new ActionWidget(action),
+        new TextWidget(action.Name, 'actions-traits-dialog__action-title'),
+        new TextWidget(`Level ${action.ClassJobLevel}`, 'actions-traits-dialog__action-level'),
+      ])
+    ));
 
-    const actionsContainer = new ContainerWidget('actions-traits-dialog__actions', {}, [
-      ...actions.map((action) =>
-        new ContainerWidget('actions-traits-dialog__action', {}, [
-          new ImageWidget(`https://xivapi.com${action.IconHD}`, 'actions-traits-dialog__action-icon'),
-          new TextWidget(action.Name, 'actions-traits-dialog__action-title'),
-          new TextWidget(`Level ${action.ClassJobLevel}`, 'actions-traits-dialog__action-level'),
-        ])
-      )
-    ]);
-
-    this.append(actionsContainer);
+    this.actionsContainer.append(
+      ...this.actionsWidgets
+    );
   }
 }

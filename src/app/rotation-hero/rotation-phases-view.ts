@@ -2,6 +2,7 @@ import { WidgetBase } from '../widgets/widget-base.js';
 import { GameDataService } from '../services/game-data.service.js';
 import { Rotation, RotationPhase } from './interfaces.js';
 import { RotationPhaseView } from './rotation-phase-view.js';
+import { PhaseEnum } from './enums.js';
 
 /**
  *
@@ -72,7 +73,7 @@ export class RotationPhasesView extends WidgetBase {
         this.rotationPhaseViews[ this.currentRotationIndex ].isDone = true;
 
         if (this.currentRotationIndex + 1 === this.rotation.phases.length) {
-          this.currentRotationIndex = this.rotation.phases.findIndex((phase) => phase.repeatable);
+          this.currentRotationIndex = this.rotation.phases.findIndex((phase) => [PhaseEnum.Cooldown, PhaseEnum.Burst].includes(phase.phase));
           this.currentActionIndex = 0;
           // this.iteration++;
         } else {

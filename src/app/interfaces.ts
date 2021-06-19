@@ -4,6 +4,7 @@ import { GameDataService } from "./services/game-data.service";
 import { GamepadService } from "./services/gamepad.service";
 import { HotbarService } from "./services/hotbar.service";
 import { KeyBindingService } from "./services/key-binding.service";
+import { PhaseEnum } from './rotation-hero/enums';
 
 export interface JobShort {
   Abbreviation: string;
@@ -48,6 +49,15 @@ export interface Services {
   gamepadService: GamepadService;
   hotbarService: HotbarService;
   keyBindingService: KeyBindingService;
+}
+
+export interface RotationCreation {
+  title: string,
+  description: string,
+  phases: {
+    phase: PhaseEnum,
+    actions: number[]
+  }[]
 }
 
 // private readonly keyBindingService = new KeyBindingService();

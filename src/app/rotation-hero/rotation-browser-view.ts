@@ -157,7 +157,7 @@ export class RotationBrowserView extends WidgetBase {
           new ImageWidget(`https://xivapi.com${classJob.Icon}`, 'rotation-browser__list-item-image'),
           new TextWidget(`${rotation.title}`, 'rotation-browser__list-item-title'),
           new TextWidget(`${classJob ? classJob.Abbreviation : rotation.classJobId} | 80 | Patch: ${rotation.patch} | ${rotation.user.username}`, 'rotation-browser__list-item-subtitle'),
-          new TextWidget(`${rotation.favouriteCount}`, 'rotation-browser__list-item-favourite'),
+          new TextWidget(`${rotation.favouriteCount} \u2665`, 'rotation-browser__list-item-favourite'),
         ])
     });
   }

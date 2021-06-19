@@ -41,7 +41,7 @@ export class HotbarService implements ServiceBase {
     this.constructHotbars();
 
     this.crossHotbar = new CrossHotbar(this.services);
-    document.body.appendChild(this.crossHotbar.viewContainer);
+    // document.body.appendChild(this.crossHotbar.viewContainer);
 
     // Listen to class changes
     this.services.appStateService.addEventListener(AppStateEvent.ClassJobChanged, (evt: CustomEvent<number>) => {

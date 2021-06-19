@@ -9,15 +9,22 @@ import { GamepadService } from "../services/gamepad.service.js";
 import { ActionsTraitsDialog } from "../dialogs/actions-traits.dialog.js";
 import { Services } from "../interfaces.js";
 import { ServiceBase } from "../services/service-base.js";
-import { AppStateService } from "../services/app-state.service.js";
+import {
+  AppStateEvent,
+  AppStateService
+} from "../services/app-state.service.js";
 import { DialogBase } from '../dialogs/dialog-base.js';
 import { WidgetBase } from '../widgets/widget-base.js';
 import { ContainerWidget } from '../widgets/container-widget.js';
 import { ButtonWidget } from '../widgets/button-widget.js';
-import { SigninSignupDialog } from '../dialogs/signin-signup.dialog.js';
+import {
+  UserDialog
+} from '../dialogs/user.dialog.js';
 import { ToggleWidget } from '../widgets/toggle-widget.js';
 import { ImageWidget } from '../widgets/image-widget.js';
 import { TextWidget } from '../widgets/text-widget.js';
+import { API } from '../api.js';
+import { ModalWidget } from '../widgets/modal-widget.js';
 
 export class ManualUI extends WidgetBase {
   private readonly services: Partial<Services> = {};
@@ -35,10 +42,13 @@ export class ManualUI extends WidgetBase {
     ActionsTraitsDialog,
     RotationHeroDialog,
     RotationBuilderDialog,
-    SigninSignupDialog
-  ]
+    UserDialog
+  ];
+  private readonly dialogInstances: Map<any, DialogBase> = new Map();
 
-  private readonly toolbarWidget = new ContainerWidget('toolbar')
+  private readonly toolbarWidget = new ContainerWidget('toolbar');
+
+  private readonly UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   // Job selection widgets
   private activeJobImageWidget: ImageWidget;
@@ -74,10 +84,43 @@ export class ManualUI extends WidgetBase {
     ]).forEach((service) => service.init());
 
     this.createView();
+
+    // check for activation
+    this.checkForUserActivation();
+
+    // check if user is logged in
+    this.checkForLoggedInUser();
   }
 
   public startTicking() {
     this.tick();
+  }
+
+  private async checkForUserActivation() {
+    const verificationTokenMatch = window.location.search.match(/[\?&]verify=([^&]+)/);
+    history.replaceState(null, '', location.pathname + location.search.replace(/[\?&]verify=[^&]+/, '').replace(/^&/, '?'));
+
+    if (verificationTokenMatch) {
+      if (!this.UUID_REGEX.test(verificationTokenMatch[ 1 ])) {
+        return this.append(new ModalWidget(new TextWidget('The verification token is not in a valid format. Did you forget to copy a character?')));
+      }
+
+      const verificationResponse = await API.verify(verificationTokenMatch[ 1 ]);
+
+      if (verificationResponse.ok) {
+        this.append(new ModalWidget(new TextWidget('Your email has been verified and you can now login.')));
+      } else {
+        this.append(new ModalWidget(new TextWidget(await verificationResponse.text())));
+      }
+    }
+  }
+
+  private async checkForLoggedInUser() {
+    const user = await API.me();
+
+    if (user && user.id) {
+      this.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.UserLogin, { detail: user }));
+    }
   }
 
   private createView() {
@@ -94,9 +137,21 @@ export class ManualUI extends WidgetBase {
     this.DIALOGS.forEach((dialogClass) => {
       const dialogInstance = new dialogClass(<Services>this.services);
 
-      const toolbarButtonWidget = new ButtonWidget(dialogInstance.uiTitle, 'toolbar__button', { click: dialogInstance.toggle.bind(dialogInstance) });
+      const toolbarButtonWidget = new ButtonWidget(
+        dialogInstance.uiTitle,
+        'toolbar__button',
+        {
+          click: () => {
+            dialogInstance.toggle();
+            if (dialogInstance.isVisible) {
+              dialogInstance.focus();
+            }
+          }
+        }
+      );
       this.toolbarWidget.append(toolbarButtonWidget);
-      document.body.appendChild(dialogInstance.viewContainer);
+      this.append(dialogInstance);
+      this.dialogInstances.set(dialogClass, dialogInstance);
     });
   }
 

@@ -16,7 +16,7 @@ export abstract class DialogBase extends WidgetBase {
 
   protected readonly services: Services;
 
-  private position: [ Number, Number ];
+  private position: [ number, number ];
   private lastMousePosition: [ number, number ] = [ 0, 0 ];
 
   /**
@@ -52,10 +52,10 @@ export abstract class DialogBase extends WidgetBase {
   public set dialogClass(dialogClass: string) {
     this._dialogClass && this.viewContainer.classList.remove(this._dialogClass);
     this._dialogClass = dialogClass;
-    this.contentContainer.classList.add(this._dialogClass);
+    this.viewContainer.classList.add(this._dialogClass);
   }
   public get dialogClass(): string {
-    return this.dialogClass;
+    return this._dialogClass;
   }
 
   constructor(services: Services, options: DialogDefaults = new DialogDefaults()) {
@@ -81,6 +81,8 @@ export abstract class DialogBase extends WidgetBase {
     });
 
     this.closeButton.addEventListener('click', () => this.isVisible = false);
+
+    this.updatePosition(100, 100);
   }
 
   /**
@@ -95,6 +97,10 @@ export abstract class DialogBase extends WidgetBase {
     this.viewContainer.querySelectorAll('.drag-handle').forEach(element => {
       element.addEventListener('mousedown', this.onMouseDragStart.bind(this));
     });
+  }
+
+  public focus() {
+    this.services.appStateService.selectedDialog = this;
   }
 
   private onDialogOrderChange(evt: CustomEvent<DialogBase[]>) {
@@ -152,8 +158,12 @@ export abstract class DialogBase extends WidgetBase {
     this.lastMousePosition = [ clientX, clientY ];
 
     // Set position
-    this.viewContainer.style.left = (offsetLeft - diffX) + 'px';
-    this.viewContainer.style.top = (offsetTop - diffY) + 'px';
+    this.updatePosition(offsetLeft - diffX, offsetTop - diffY);
+  }
+
+  private updatePosition(x: number, y: number) {
+    this.viewContainer.style.left = x + 'px';
+    this.viewContainer.style.top = y + 'px';
   }
 
   private onMouseDragStop(evt: MouseEvent): void {

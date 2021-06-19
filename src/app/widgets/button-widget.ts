@@ -1,6 +1,8 @@
 import { WidgetBase } from './widget-base.js';
 
 export class ButtonWidget extends WidgetBase {
+  declare viewContainer: HTMLButtonElement;
+
   constructor(text: string, containerClass: string = '', events: { [k: string]: () => void } = {}) {
     super(containerClass, 'button');
     this.viewContainer.innerText = text;
@@ -19,5 +21,12 @@ export class ButtonWidget extends WidgetBase {
   }
   get text() {
     return this.viewContainer.innerText;
+  }
+
+  set disabled(value: boolean) {
+    this.viewContainer.disabled = value;
+  }
+  get disabled() {
+    return this.viewContainer.disabled;
   }
 }

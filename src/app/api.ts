@@ -1,4 +1,8 @@
-import { Rotation } from './rotation-hero/interfaces';
+import {
+  Rotation,
+  User
+} from './rotation-hero/interfaces';
+import { RotationCreation } from './interfaces';
 
 interface QueryParams<T> extends Object {
   sortBy?: keyof T
@@ -28,28 +32,32 @@ export interface PaginatedResponse<T> {
 
 export class API {
   private static readonly API_BASE_URL = 'https://api.xivrotationhero.com';
-  // private static readonly API_BASE_URL = 'http://localhost:8083';
+  //private static readonly API_BASE_URL = 'http://localhost:8083';
 
   // AUTH
 
-  static async signIn(email: string, password: string) {
+  static async signIn(email: string, password: string): Promise<User> {
     return this.request('/auth/login', 'POST', JSON.stringify({ email, password })).then(response => response.json());
   }
 
-  static async signInWithToken(token: string) {
-    return this.request('/auth/token', 'POST', JSON.stringify({ token })).then(response => response.json());
+  static async signUp(email: string, username: string, password: string) {
+    return this.request('/auth/signup', 'POST', JSON.stringify({ email, password, username })).then(response => response.json());
   }
 
-  static async signUp(email: string, username: string, password: string) {
-    return this.request('/auth/signup', 'POST');
+  static async me(): Promise<User> {
+    return this.request('/auth/me', 'GET').then(response => response.json());
+  }
+
+  static async verify(token: string): Promise<Response> {
+    return this.request(`/auth/verify/${token}`, 'POST');
   }
 
   static async logout() {
-    return this.request('/auth/token', 'GET');
+    return this.request('/auth/logout', 'GET');
   }
 
   // ROTATIONS
-  static async createRotation(rotation: any): Promise<Rotation> {
+  static async createRotation(rotation: RotationCreation): Promise<Rotation> {
     return this.request('/rotation/', 'POST', JSON.stringify(rotation)).then(response => response.json());
   }
 

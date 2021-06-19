@@ -1,10 +1,12 @@
+@import './variables.scss';
+
 .rotation-browser {
 
   &__tab-bar {
     padding: 0 12px;
 
-    &--primary { background: #262626; font-size: 14px; }
-    &--secondary { background: #353535; font-size: 11px; }
+    &--primary { background: $primary-dark; font-size: 14px; }
+    &--secondary { background: $primary-light; font-size: 11px; }
   }
 
   &__loading-view,

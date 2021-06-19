@@ -62,7 +62,7 @@ export class RotationPhaseView extends WidgetBase {
   ) {
     super('rotation-hero__rotation');
 
-    this.rotationTitleWidget.text = rotationPhase.title;
+    this.rotationTitleWidget.text = rotationPhase.phase;
     this.rotationActionCounterWidget.text = `0/${rotationPhase.actions.length}`;
     this.append(
       this.rotationTitleWidget,

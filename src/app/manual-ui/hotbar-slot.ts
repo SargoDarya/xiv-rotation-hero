@@ -119,6 +119,10 @@ export class HotbarSlot {
           const sourceHotbarId = parseInt(evt.dataTransfer.getData('hotbarId'), 10);
           const sourceSlotId = parseInt(evt.dataTransfer.getData('slotId'), 10);
           this.hotbar.hotbarService.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
+          break;
+
+        case 'action':
+          break;
 
         default:
           break;

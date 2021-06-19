@@ -6,6 +6,7 @@ import { TextWidget } from './text-widget.js';
 
 export enum FormInputType {
   Text = 'text',
+  Email = 'email',
   Password = 'password',
   Radio = 'radio',
   Checkbox = 'checkbox',
@@ -17,6 +18,8 @@ export interface FormInputDescription {
   label?: string;
   className?: string;
   name?: string;
+  minLength?: number;
+  maxLength?: number;
 }
 
 export class FormWidget extends WidgetBase {
@@ -31,6 +34,14 @@ export class FormWidget extends WidgetBase {
       } else {
         const inputWidget = new InputWidget(declaration.type, declaration.className ? declaration.className : `form__input--${declaration.type}`);
         inputWidget.viewContainer.name = declaration.name || '';
+
+        if (declaration.minLength) {
+          inputWidget.viewContainer.minLength = declaration.minLength;
+        }
+
+        if (declaration.maxLength) {
+          inputWidget.viewContainer.maxLength = declaration.maxLength;
+        }
 
         // If there is no label just return the input
         if (!declaration.label) {

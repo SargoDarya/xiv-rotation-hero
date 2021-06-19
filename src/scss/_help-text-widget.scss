@@ -1,0 +1,29 @@
+.help-text-widget {
+  border: 2px solid white;
+  background: darkgreen;
+  box-sizing: border-box;
+  margin: 6px;
+  padding: 12px;
+  font-size: 12px;
+  display: flex;
+
+  &::before {
+    content: '?';
+    margin-right: 12px;
+    font-weight: 900;
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  &__text {
+    margin-right: 24px;
+  }
+
+  &__dismiss-button {
+    margin-left: auto;
+    color: white;
+    border: 1px solid white;
+    padding: 4px;
+    line-height: 1;
+  }
+}
