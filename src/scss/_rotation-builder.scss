@@ -7,6 +7,18 @@
     outline: none;
   }
 
+  &__meta-toggle {
+    display: flex;
+    font-size: 11px;
+    text-transform: uppercase;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    width: 100%;
+    background: rgba(0, 0, 0, .3);
+    border-bottom: 1px solid rgba(255, 255, 255, .4);
+  }
+
   &__title-input,
   &__description-input {
     display: block;

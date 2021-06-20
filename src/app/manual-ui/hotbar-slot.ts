@@ -98,26 +98,32 @@ export class HotbarSlot {
 
   private onStartDrag(evt: DragEvent) {
     if (evt.dataTransfer && this.action) {
-      evt.dataTransfer.setData('dragType', 'slot-to-slot');
-      evt.dataTransfer.setData('hotbarId', this.hotbarId.toString());
-      evt.dataTransfer.setData('slotId', this.slotId.toString());
+      evt.dataTransfer.setData('drag-type', 'slot-to-slot');
+      evt.dataTransfer.setData('hotbar-id', this.hotbarId.toString());
+      evt.dataTransfer.setData('slot-id', this.slotId.toString());
+      evt.dataTransfer.setData('is-hotbar-assignable', 'true');
     }
   }
 
   private onDragOver(evt: DragEvent) {
-    evt.preventDefault();
+    const dt = (<DataTransfer>evt.dataTransfer);
+    if (dt.types.includes('is-hotbar-assignable')) {
+      console.log('preventing');
+      evt.preventDefault();
+      return false;
+    }
   }
 
   private onDrop(evt: DragEvent) {
     evt.preventDefault();
 
     if (evt.dataTransfer) {
-      const dragType = evt.dataTransfer.getData('dragType');
+      const dragType = evt.dataTransfer.getData('drag-type');
 
       switch (dragType) {
         case 'slot-to-slot':
-          const sourceHotbarId = parseInt(evt.dataTransfer.getData('hotbarId'), 10);
-          const sourceSlotId = parseInt(evt.dataTransfer.getData('slotId'), 10);
+          const sourceHotbarId = parseInt(evt.dataTransfer.getData('hotbar-id'), 10);
+          const sourceSlotId = parseInt(evt.dataTransfer.getData('slot-id'), 10);
           this.hotbar.hotbarService.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
           break;
 

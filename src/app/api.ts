@@ -31,17 +31,17 @@ export interface PaginatedResponse<T> {
 }
 
 export class API {
-  private static readonly API_BASE_URL = 'https://api.xivrotationhero.com';
-  //private static readonly API_BASE_URL = 'http://localhost:8083';
+  // private static readonly API_BASE_URL = 'https://api.xivrotationhero.com';
+  private static readonly API_BASE_URL = 'http://localhost:8083';
 
   // AUTH
 
-  static async signIn(email: string, password: string): Promise<User> {
-    return this.request('/auth/login', 'POST', JSON.stringify({ email, password })).then(response => response.json());
+  static async signIn(email: string, password: string) {
+    return this.request('/auth/login', 'POST', JSON.stringify({ email, password }));
   }
 
   static async signUp(email: string, username: string, password: string) {
-    return this.request('/auth/signup', 'POST', JSON.stringify({ email, password, username })).then(response => response.json());
+    return this.request('/auth/signup', 'POST', JSON.stringify({ email, password, username }));
   }
 
   static async me(): Promise<User> {

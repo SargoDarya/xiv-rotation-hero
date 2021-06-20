@@ -1,8 +1,13 @@
-import { Action, Job } from "../interfaces";
+import {
+  Action,
+  ActionIndirection,
+  Job
+} from "../interfaces";
 
 export class GameDataService extends EventTarget {
   private actionsById: { [ actionId: number ]: Action } = {};
   private actionsByClassJob: { [ classJobId: string ]: Action[] } = {};
+  private actionIndirectionsById: { [ actionId: number ]: ActionIndirection } = {};
   private classJobs: Job[] = [];
   private classJobsById: Map<number, Job> = new Map();
 
@@ -12,11 +17,14 @@ export class GameDataService extends EventTarget {
       fetch('./assets/classjobactions.json')
         .then(response => response.json())
         .then(this.registerActions.bind(this)),
+      fetch('./assets/actionindirections.json')
+        .then(response => response.json())
+        .then(this.registerActionIndirections.bind(this)),
       fetch('./assets/classjobs.json')
         .then(response => response.json())
         .then((response: Job[]) => {
           this.classJobs = response;
-          response.map((job) => {
+          response.forEach((job) => {
             this.classJobsById.set(job.ID, job);
           })
         }),
@@ -31,6 +39,17 @@ export class GameDataService extends EventTarget {
 
   getActionsByClassJobId(classJobId: number) {
     return this.actionsByClassJob[ classJobId ];
+  }
+
+  getActionIndirectionById(id: number) {
+    return this.actionIndirectionsById[ id ];
+  }
+
+  getActionIndirectionsByClassJobId(classJobId: number) {
+    const classJob = this.classJobsById.get(classJobId);
+    if (!classJob || !classJob.GameContentLinks.ActionIndirection) return [];
+
+    return classJob.GameContentLinks.ActionIndirection.ClassJob.map((actionIndirection) => this.actionIndirectionsById[ actionIndirection ]);
   }
 
   getClassJobs() {
@@ -50,7 +69,7 @@ export class GameDataService extends EventTarget {
   getClassJobAbbreviation(classJobID: number) {
     const classJob = this.getClassJob(classJobID);
 
-    return classJob ? classJob.Abbreviation : classJob
+    return classJob ? classJob.Abbreviation : classJob;
   }
 
   private registerActions(actions: { [ classJobId: string ]: Action[] }): void {
@@ -58,6 +77,12 @@ export class GameDataService extends EventTarget {
 
     Object.values(actions).flat().forEach((action) => {
       this.actionsById[ action.ID ] = action;
+    });
+  }
+
+  private registerActionIndirections(actionIndirections: ActionIndirection[]): void {
+    Object.values(actionIndirections).forEach((action) => {
+      this.actionIndirectionsById[ action.ID ] = action;
     });
   }
 }

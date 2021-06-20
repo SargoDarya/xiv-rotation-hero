@@ -36,10 +36,16 @@ export class ActionsTraitsDialog extends DialogBase {
       return;
     }
 
-    const actions = [ ...this.services.gameDataService.getActionsByClassJobId(classJobId) ].sort((a, b) => a.ClassJobLevel - b.ClassJobLevel);
+    const actions = [
+      ...this.services.gameDataService.getActionsByClassJobId(classJobId),
+      // ...this.services.gameDataService.getActionIndirectionsByClassJobId(classJobId).map((a) => a.Name)
+    ]
+      .filter(a => a.ClassJobLevel !== 0)
+      .sort((a, b) => a.ClassJobLevel - b.ClassJobLevel);
+
     this.actionsWidgets.splice(0, this.actionsWidgets.length, ...actions.map((action) =>
       new ContainerWidget('actions-traits-dialog__action', {}, [
-        new ActionWidget(action),
+        new ActionWidget(action, this.services),
         new TextWidget(action.Name, 'actions-traits-dialog__action-title'),
         new TextWidget(`Level ${action.ClassJobLevel}`, 'actions-traits-dialog__action-level'),
       ])

@@ -25,6 +25,8 @@ import { ImageWidget } from '../widgets/image-widget.js';
 import { TextWidget } from '../widgets/text-widget.js';
 import { API } from '../api.js';
 import { ModalWidget } from '../widgets/modal-widget.js';
+import { User } from '../rotation-hero/interfaces.js';
+import { TooltipService } from '../services/tooltip.service.js';
 
 export class ManualUI extends WidgetBase {
   private readonly services: Partial<Services> = {};
@@ -36,17 +38,18 @@ export class ManualUI extends WidgetBase {
   private readonly gamepadService: GamepadService;
   private readonly hotbarService: HotbarService;
   private readonly keyBindingService: KeyBindingService;
+  private readonly tooltipService: TooltipService;
 
   private readonly DIALOGS: ((new (services: Services) => DialogBase) & Omit<typeof DialogBase, never>)[] = [
     HotbarLayoutDialog,
     ActionsTraitsDialog,
     RotationHeroDialog,
-    RotationBuilderDialog,
-    UserDialog
+    RotationBuilderDialog
   ];
   private readonly dialogInstances: Map<any, DialogBase> = new Map();
 
   private readonly toolbarWidget = new ContainerWidget('toolbar');
+  private toolbarUserButton: ButtonWidget;
 
   private readonly UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -65,6 +68,7 @@ export class ManualUI extends WidgetBase {
     this.services.gamepadService = new GamepadService(<Services>this.services);
     this.services.hotbarService = new HotbarService(<Services>this.services);
     this.services.keyBindingService = new KeyBindingService(<Services>this.services);
+    this.services.tooltipService = new TooltipService();
 
     // Local accessors
     this.actionService = this.services.actionService;
@@ -73,6 +77,7 @@ export class ManualUI extends WidgetBase {
     this.gamepadService = this.services.gamepadService;
     this.hotbarService = this.services.hotbarService;
     this.keyBindingService = this.services.keyBindingService;
+    this.tooltipService = this.services.tooltipService;
 
     // Initialise services
     (<ServiceBase[]>[
@@ -80,7 +85,8 @@ export class ManualUI extends WidgetBase {
       this.appStateService,
       this.gamepadService,
       this.hotbarService,
-      this.keyBindingService
+      this.keyBindingService,
+      this.tooltipService
     ]).forEach((service) => service.init());
 
     this.createView();
@@ -90,6 +96,13 @@ export class ManualUI extends WidgetBase {
 
     // check if user is logged in
     this.checkForLoggedInUser();
+
+    this.appStateService.addEventListener(AppStateEvent.UserLogin, (evt: CustomEvent<User>) => {
+      this.toolbarUserButton.text = evt.detail.username
+    });
+    this.appStateService.addEventListener(AppStateEvent.UserLogout, () => {
+      this.toolbarUserButton.text = (<UserDialog>this.dialogInstances.get(UserDialog)).uiTitle;
+    });
   }
 
   public startTicking() {
@@ -153,6 +166,27 @@ export class ManualUI extends WidgetBase {
       this.append(dialogInstance);
       this.dialogInstances.set(dialogClass, dialogInstance);
     });
+
+    this.createUserDialog();
+  }
+
+  private createUserDialog() {
+    const userDialog = new UserDialog(<Services>this.services);
+    this.append(userDialog);
+    this.dialogInstances.set(UserDialog, userDialog);
+    this.toolbarUserButton = new ButtonWidget(
+      userDialog.uiTitle,
+      'toolbar__button',
+      {
+        click: () => {
+          userDialog.toggle();
+          if (userDialog.isVisible) {
+            userDialog.focus();
+          }
+        }
+      }
+    );
+    this.toolbarWidget.append(this.toolbarUserButton);
   }
 
   private createJobSelectionView() {

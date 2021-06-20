@@ -1,10 +1,6 @@
-import { ActionService } from "./action.service.js";
 import { Hotbar, HotbarOptions, HotbarStyle } from "../manual-ui/hotbar.js";
 import { Action, Services } from "../interfaces.js";
-import { KeyBindingService } from "./key-binding.service.js";
 import { CrossHotbar } from "../manual-ui/cross-hotbar.js";
-import { GamepadService } from "./gamepad.service.js";
-import { GameDataService } from "./game-data.service.js";
 import { ServiceBase } from "./service-base.js";
 import { AppStateEvent } from "./app-state.service.js";
 
@@ -17,6 +13,7 @@ export class HotbarService implements ServiceBase {
   public hotbars: Hotbar[];
   public crossHotbar: CrossHotbar;
 
+  private readonly HOTBAR_PERSISTANCE_KEY = 'hotbar-allocation-';
   private hotbarSettings: HotbarOptions[];
   private HOTBAR_KEYS = [
     'Digit1',
@@ -41,7 +38,6 @@ export class HotbarService implements ServiceBase {
     this.constructHotbars();
 
     this.crossHotbar = new CrossHotbar(this.services);
-    // document.body.appendChild(this.crossHotbar.viewContainer);
 
     // Listen to class changes
     this.services.appStateService.addEventListener(AppStateEvent.ClassJobChanged, (evt: CustomEvent<number>) => {
@@ -88,7 +84,7 @@ export class HotbarService implements ServiceBase {
     this.currentClassJobId = classJobId;
 
     // Check if there's a stored state for this job in local storage
-    const existingHotbarData = localStorage.getItem(`hotbar-placement-${classJobId}`);
+    const existingHotbarData = localStorage.getItem(`${this.HOTBAR_PERSISTANCE_KEY}${classJobId}`);
 
     this.clearAllHotbars();
 
@@ -103,7 +99,10 @@ export class HotbarService implements ServiceBase {
       });
     } else {
       const actions = this.services.gameDataService.getActionsByClassJobId(classJobId);
-      this.autoSetActions(actions);
+
+      this.autoSetActions(actions.filter((action) => {
+        return !action.Description.match('※This action cannot be assigned to a hotbar');
+      }));
     }
   }
 
@@ -170,7 +169,7 @@ export class HotbarService implements ServiceBase {
   }
 
   public persistHotbarAllocation() {
-    localStorage.setItem(`hotbar-placement-${this.currentClassJobId}`, JSON.stringify({
+    localStorage.setItem(`${this.HOTBAR_PERSISTANCE_KEY}${this.currentClassJobId}`, JSON.stringify({
       hotbars: this.hotbars.map((hotbar) => hotbar.getSlotActionIds()),
       crossHotbars: []
     }));

@@ -5,6 +5,7 @@ import { GamepadService } from "./services/gamepad.service";
 import { HotbarService } from "./services/hotbar.service";
 import { KeyBindingService } from "./services/key-binding.service";
 import { PhaseEnum } from './rotation-hero/enums';
+import { TooltipService } from './services/tooltip.service';
 
 export interface JobShort {
   Abbreviation: string;
@@ -25,12 +26,19 @@ export interface Job extends JobShort {
   ClassJobParent: {
     ClassJobCategory: number
   },
+  GameContentLinks: {
+    Actions: number[],
+    ActionIndirection: {
+      ClassJob: number[]
+    } | null
+  }
 }
 
 export interface Action {
   ID: number,
   Name: string,
   Description: string,
+  BehaviourType: number,
   ClassJobLevel: number,
   CooldownGroup: number,
   ActionComboTargetID: any,
@@ -39,7 +47,20 @@ export interface Action {
   Recast100ms: number,
   PreservesCombo: number,
   PrimaryCostType: number,
-  PrimaryCostValue: number
+  PrimaryCostValue: number,
+  ActionCategory: {
+    ID: number,
+    Name: string
+  },
+  CastType: number,
+  EffectRange: number,
+  Range: number,
+  TargetArea: number
+}
+
+export interface ActionIndirection {
+  ID: number,
+  Name: Action
 }
 
 export interface Services {
@@ -49,6 +70,7 @@ export interface Services {
   gamepadService: GamepadService;
   hotbarService: HotbarService;
   keyBindingService: KeyBindingService;
+  tooltipService: TooltipService;
 }
 
 export interface RotationCreation {

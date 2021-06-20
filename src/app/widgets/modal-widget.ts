@@ -15,6 +15,6 @@ export class ModalWidget extends WidgetBase {
   }
 
   dismiss() {
-    this.viewContainer.remove();
+    this.removeSelf();
   }
 }

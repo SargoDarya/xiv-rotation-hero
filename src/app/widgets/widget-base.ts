@@ -10,6 +10,8 @@ export class WidgetBase extends EventTarget {
   }
   public get isVisible() { return this._isVisible; }
 
+  public parent?: WidgetBase;
+
   // Just a shortcut for the view container
   public readonly classList: DOMTokenList;
 
@@ -47,6 +49,7 @@ export class WidgetBase extends EventTarget {
 
   public append(...widgets: WidgetBase[]): void {
     widgets.forEach((widget) => {
+      widget.parent = this;
       this.children.add(widget);
       this.viewContainer.appendChild(widget.viewContainer);
     });
@@ -57,6 +60,14 @@ export class WidgetBase extends EventTarget {
       this.children.delete(widget);
       this.viewContainer.removeChild(widget.viewContainer);
     });
+  }
+
+  public removeSelf(): void {
+    if (!this.parent) {
+      return;
+    }
+
+    this.parent.remove(this);
   }
 
   protected reset(): void {

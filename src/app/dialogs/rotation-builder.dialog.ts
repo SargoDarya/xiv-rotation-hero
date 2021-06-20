@@ -20,6 +20,8 @@ import { TextareaWidget } from '../widgets/textarea-widget.js';
 import { InputWidget } from '../widgets/input.widget.js';
 import { FormInputType } from '../widgets/form-widget.js';
 import { API } from '../api.js';
+import { ModalWidget } from '../widgets/modal-widget.js';
+import { ToggleWidget } from '../widgets/toggle-widget.js';
 
 
 export class RotationBuilderDialog extends DialogBase {
@@ -57,7 +59,7 @@ export class RotationBuilderDialog extends DialogBase {
 
     // Set placeholders
     this.titleInputWidget.viewContainer.placeholder = 'Enter rotation title';
-    this.descriptionTextareaWidget.viewContainer.placeholder = 'Enter a description for your rotation'
+    this.descriptionTextareaWidget.viewContainer.placeholder = 'Enter a description for your rotation';
 
     // Create phases
     this.phaseWidgets = new Map([
@@ -70,9 +72,14 @@ export class RotationBuilderDialog extends DialogBase {
     // Set up listeners
     this.services.actionService.addEventListener('trigger', this.onAction.bind(this));
 
-    this.append(
+    const metaInformation = new ContainerWidget('rotation-builder__meta-information', {}, [
       this.titleInputWidget,
-      this.descriptionTextareaWidget,
+      this.descriptionTextareaWidget
+    ]);
+
+    this.append(
+      metaInformation,
+      new ToggleWidget(metaInformation, new TextWidget('Toggle Meta Information'), 'rotation-builder__meta-toggle'),
       this.createToolbar(),
       this.addingActionsHelpView
     );
@@ -191,6 +198,10 @@ export class RotationBuilderDialog extends DialogBase {
 
 
   private async saveRotation() {
+    if (!this.services.appStateService.loggedInUser) {
+      this.append(new ModalWidget(new TextWidget('You need to be logged in to save rotations.')));
+      return;
+    }
     await API.createRotation(this.createRotation());
   }
 
@@ -247,8 +258,8 @@ class RotationBuilderPhaseWidget extends ContainerWidget {
       evt.preventDefault();
 
       const dt = <DataTransfer>evt.dataTransfer;
-      if (dt.getData('dragType') === 'action') {
-        const action = this.gameDataService.getActionById(parseInt(dt.getData('actionId'), 10));
+      if (dt.getData('drag-type') === 'action') {
+        const action = this.gameDataService.getActionById(parseInt(dt.getData('action-id'), 10));
         this.appendAction(action);
       }
 

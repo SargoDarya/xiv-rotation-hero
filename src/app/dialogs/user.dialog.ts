@@ -10,6 +10,7 @@ import { ButtonWidget } from '../widgets/button-widget.js';
 import { TextWidget } from '../widgets/text-widget.js';
 import { AppStateEvent } from '../services/app-state.service.js';
 import { User } from '../rotation-hero/interfaces.js';
+import { ModalWidget } from '../widgets/modal-widget.js';
 
 export enum UserDialogActiveViewEnum {
   SignIn,
@@ -137,6 +138,7 @@ export class UserDialog extends DialogBase {
 
   private async logout() {
     await API.logout();
+    this.services.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.UserLogout))
     this.changeActiveView(UserDialogActiveViewEnum.SignIn);
   }
 
@@ -145,8 +147,10 @@ export class UserDialog extends DialogBase {
     const formData = new FormData(<HTMLFormElement>evt.target);
     const signUpResponse = await API.signUp(<string>formData.get('email') || '', <string>formData.get('username') || '', <string>formData.get('password') || '');
 
-    if (signUpResponse) {
+    if (signUpResponse.ok) {
       this.changeActiveView(UserDialogActiveViewEnum.SignUpSuccess);
+    } else {
+      this.append(new ModalWidget(new TextWidget(await signUpResponse.text())));
     }
   }
 
@@ -155,8 +159,10 @@ export class UserDialog extends DialogBase {
     const formData = new FormData(<HTMLFormElement>evt.target);
     const signInResponse = await API.signIn(<string>formData.get('email') || '', <string>formData.get('password') || '');
 
-    if (signInResponse) {
-      this.services.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.UserLogin, { detail: signInResponse }));
+    if (signInResponse.ok) {
+      this.services.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.UserLogin, { detail: await signInResponse.json() }));
+    } else {
+      this.append(new ModalWidget(new TextWidget('Wrong username or password')));
     }
   }
 
