@@ -1,16 +1,18 @@
 import { Services } from "../interfaces.js";
 import { AppStateEvent } from "../services/app-state.service.js";
-import { createView } from "../utils.js";
 import { WidgetBase } from '../widgets/widget-base.js';
+import { ContainerWidget } from '../widgets/container-widget.js';
+import { ButtonWidget } from '../widgets/button-widget.js';
+import { TextWidget } from '../widgets/text-widget.js';
 
 class DialogDefaults {
   closable: boolean = true;
   resizable: boolean = false;
 }
 export abstract class DialogBase extends WidgetBase {
-  public contentContainer = createView('div', 'dialog__content');
-  private closeButton = createView('button', 'dialog__close-button');
-  private titleContainer = createView('div', 'dialog__title', 'drag-handle');
+  public contentContainer = new ContainerWidget('dialog__content');
+  private closeButton = new ButtonWidget('', 'dialog__close-button');
+  private titleContainer = new TextWidget('', 'dialog__title');
 
   public abstract uiTitle: string;
 
@@ -38,8 +40,8 @@ export abstract class DialogBase extends WidgetBase {
   private _title: string = 'Dialog';
   public set title(title: string) {
     this._title = title;
-    this.titleContainer.innerText = title;
-    this.titleContainer.style.display = title.length > 0 ? 'block' : 'none';
+    this.titleContainer.text = title;
+    this.titleContainer.toggleModifier('empty', title.length === 0);
   }
   public get title() {
     return this._title;
@@ -58,7 +60,7 @@ export abstract class DialogBase extends WidgetBase {
     return this._dialogClass;
   }
 
-  constructor(services: Services, options: DialogDefaults = new DialogDefaults()) {
+  protected constructor(services: Services, options: DialogDefaults = new DialogDefaults()) {
     super('dialog');
 
     this.services = services;
@@ -67,11 +69,12 @@ export abstract class DialogBase extends WidgetBase {
 
     this.createDialogBase();
     this.title = '';
+    this.titleContainer.classList.add('drag-handle');
 
     this.services.appStateService.addEventListener(AppStateEvent.DialogOrderChanged, this.onDialogOrderChange.bind(this));
 
     if (!options.closable) {
-      this.closeButton.style.display = 'none';
+      this.closeButton.addModifier('hidden');
     }
 
     this.viewContainer.addEventListener('mousedown', () => {
@@ -80,7 +83,7 @@ export abstract class DialogBase extends WidgetBase {
       }
     });
 
-    this.closeButton.addEventListener('click', () => this.isVisible = false);
+    this.closeButton.viewContainer.addEventListener('click', () => this.isVisible = false);
 
     this.updatePosition(100, 100);
   }
@@ -115,14 +118,16 @@ export abstract class DialogBase extends WidgetBase {
   }
 
   private createDialogBase() {
-    this.viewContainer.appendChild(this.closeButton);
-    this.viewContainer.appendChild(this.titleContainer);
-    this.viewContainer.appendChild(this.contentContainer);
+    this.append(
+      this.closeButton,
+      this.titleContainer,
+      this.contentContainer
+    )
   }
 
   // Convenience methods for subclasses
-  protected appendChild(element: HTMLElement): void {
-    this.contentContainer.appendChild(element);
+  protected appendContent(widget: WidgetBase): void {
+    this.contentContainer.append(widget);
   }
 
   // Event listeners for drag handling

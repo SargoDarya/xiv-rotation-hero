@@ -20,10 +20,9 @@ export class TooltipService implements ServiceBase {
   }
 
   hideTooltip() {
-    if (this.activeTooltip) {
-      this.tooltipContainer.remove(this.activeTooltip);
-      this.activeTooltip = undefined;
-    }
+    if (!this.activeTooltip) return;
+    this.tooltipContainer.remove(this.activeTooltip);
+    this.activeTooltip = undefined;
     document.body.removeChild(this.tooltipContainer.viewContainer);
   }
 }

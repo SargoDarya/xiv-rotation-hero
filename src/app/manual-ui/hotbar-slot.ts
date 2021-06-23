@@ -1,16 +1,17 @@
 import { Hotbar } from "./hotbar.js";
 import { Action } from "../interfaces.js";
-import { createView } from "../utils.js";
+import { WidgetBase } from '../widgets/widget-base.js';
+import { ContainerWidget } from '../widgets/container-widget.js';
+import { ActionWidget } from '../widgets/action-widget.js';
+import { TextWidget } from '../widgets/text-widget.js';
+import { KeyBindingEvent } from '../services/key-binding.service.js';
+import { CooldownWidget } from '../widgets/cooldown-widget.js';
 
-const RECAST_ANIMATION: any[] = [
-  { backgroundPositionX: '0%' },
-  { backgroundPositionX: '100%' }
-];
-export class HotbarSlot {
-  private readonly viewContainer = createView('div', 'hotbar-slot');
-  private readonly actionImageView = createView('div', 'hotbar-slot__action');
-  private readonly actionCooldownView = createView('div', 'hotbar-slot__cooldown');
-  private readonly slotKeyBindingView = createView('div', 'hotbar-slot__keybinding');
+export class HotbarSlot extends WidgetBase {
+  private readonly actionContainerView = new ContainerWidget('hotbar-slot__action-container');
+  private readonly actionCooldownView = new CooldownWidget();
+  private readonly slotKeyBindingView = new TextWidget('', 'hotbar-slot__keybinding');
+  private activeActionWidget: ActionWidget | undefined;
   private lastCooldownValue: number;
 
   private _action?: Action;
@@ -18,11 +19,16 @@ export class HotbarSlot {
     return this._action;
   }
   set action(action: Action | undefined) {
+    if (this.activeActionWidget) {
+      this.activeActionWidget.removeSelf();
+      this.activeActionWidget = undefined;
+    }
     this._action = action;
 
     action ? this.viewContainer.classList.remove('hotbar-slot--empty') : this.viewContainer.classList.add('hotbar-slot--empty');
     if (action) {
-      this.actionImageView.style.backgroundImage = `url('https://xivapi.com${action.IconHD}')`;
+      this.activeActionWidget = this.hotbar.services.actionService.getActionWidget(action.ID, { isHotbarAssigned: true, hotbarId: this.hotbarId, slotId: this.slotId });
+      this.actionContainerView.append(this.activeActionWidget);
     }
   }
 
@@ -35,36 +41,47 @@ export class HotbarSlot {
     private readonly hotbarId: number,
     private readonly slotId: number
   ) {
+    super('hotbar-slot');
+
     this.createView();
     this.action = undefined;
     this.viewContainer.addEventListener('click', this.trigger.bind(this));
-    this.hotbar.actionService.registerSlot(this);
-    this.hotbar.actionService.addEventListener('trigger', this.updateActionState.bind(this));
+    this.hotbar.services.actionService.registerSlot(this);
+    this.hotbar.services.actionService.addEventListener('trigger', this.updateActionState.bind(this));
+
+    this.hotbar.services.keyBindingService.addEventListener(KeyBindingEvent.BindingRegistered, this.updateKeybindingView.bind(this));
+    this.hotbar.services.keyBindingService.addEventListener(KeyBindingEvent.BindingChanged, this.updateKeybindingView.bind(this));
   }
 
   trigger() {
     if (this._action) {
-      this.hotbar.actionService.triggerAction(this._action);
-      this.actionCooldownView.style.backgroundImage = `url('./assets/icona_recast_hr1.png')`;
-      this.actionCooldownView.animate(RECAST_ANIMATION, { duration: this._action.Recast100ms * 10, easing: 'steps(80)' }).finished.then(() => {
-        this.actionCooldownView.style.backgroundImage = 'none';
-      });
+      this.hotbar.services.actionService.triggerAction(this._action);
     }
 
-    this.viewContainer.classList.add('hotbar-slot--triggered');
+    this.addModifier('triggered');
     setTimeout(() => {
-      this.viewContainer.classList.remove('hotbar-slot--triggered');
+      this.removeModifier('triggered');
     }, 100);
   }
 
   updateActionState(evt: CustomEvent<Action>) {
-    if (this.action && this.action.ActionComboTargetID) {
+    if (!this.action) {
+      return;
+    }
+
+    // Cooldown handling
+    if (this.action.CooldownGroup === evt.detail.CooldownGroup) {
+      this.actionCooldownView.setCooldown(evt.detail.Recast100ms * 100);
+    }
+
+    // Combo handling
+    if (this.action.ActionComboTargetID) {
       if (this.action.ActionComboTargetID === evt.detail.ID) {
         // Combo started
-        this.actionImageView.classList.add('hotbar-slot__action--combo');
+        this.actionContainerView.addModifier('combo');
       } else if (evt.detail.PreservesCombo === 0) {
         // Combo cancelled
-        this.actionImageView.classList.remove('hotbar-slot__action--combo');
+        this.actionContainerView.removeModifier('combo');
       }
     }
   }
@@ -75,40 +92,44 @@ export class HotbarSlot {
       return;
     }
 
-    const currentCooldown = this.hotbar.actionService.isActionOnCooldown(this._action);
+    const currentCooldown = this.hotbar.services.actionService.isActionOnCooldown(this._action);
 
     if (currentCooldown !== this.lastCooldownValue) {
       this.lastCooldownValue = currentCooldown;
     }
   }
 
-  private createView() {
-    this.viewContainer.appendChild(this.actionImageView);
-    this.viewContainer.appendChild(this.actionCooldownView);
-    this.viewContainer.appendChild(this.slotKeyBindingView);
+  private updateKeybindingView() {
+    const binding = this.hotbar.services.keyBindingService.getBinding(`Hotbar ${this.hotbarId + 1} - Slot ${this.slotId + 1}`);
 
-    this.actionImageView.draggable = true;
+    // Reset modifiers
+    this.slotKeyBindingView.removeModifier('ctrl', 'shift', 'alt');
 
-    this.slotKeyBindingView.innerText = (this.slotId + 1).toString();
-
-    this.actionImageView.addEventListener('dragstart', this.onStartDrag.bind(this));
-    this.viewContainer.addEventListener('drop', this.onDrop.bind(this));
-    this.viewContainer.addEventListener('dragover', this.onDragOver.bind(this));
+    if (binding) {
+      const [ mainKey, ...modifiers ] = binding.split('+').reverse();
+      this.slotKeyBindingView.addModifier(...modifiers.map(modifier => modifier.toLowerCase()));
+      this.slotKeyBindingView.text = mainKey.replace('Key', '');
+    } else {
+      this.slotKeyBindingView.text = '';
+    }
   }
 
-  private onStartDrag(evt: DragEvent) {
-    if (evt.dataTransfer && this.action) {
-      evt.dataTransfer.setData('drag-type', 'slot-to-slot');
-      evt.dataTransfer.setData('hotbar-id', this.hotbarId.toString());
-      evt.dataTransfer.setData('slot-id', this.slotId.toString());
-      evt.dataTransfer.setData('is-hotbar-assignable', 'true');
-    }
+  private createView() {
+    this.append(
+      this.actionContainerView,
+      this.actionCooldownView,
+      this.slotKeyBindingView
+    );
+
+    this.viewContainer.addEventListener('drop', this.onDrop.bind(this));
+    this.viewContainer.addEventListener('dragover', this.onDragOver.bind(this));
+
+    this.updateKeybindingView();
   }
 
   private onDragOver(evt: DragEvent) {
     const dt = (<DataTransfer>evt.dataTransfer);
     if (dt.types.includes('is-hotbar-assignable')) {
-      console.log('preventing');
       evt.preventDefault();
       return false;
     }
@@ -119,15 +140,17 @@ export class HotbarSlot {
 
     if (evt.dataTransfer) {
       const dragType = evt.dataTransfer.getData('drag-type');
+      const actionId = evt.dataTransfer.getData('action-id');
 
       switch (dragType) {
         case 'slot-to-slot':
           const sourceHotbarId = parseInt(evt.dataTransfer.getData('hotbar-id'), 10);
           const sourceSlotId = parseInt(evt.dataTransfer.getData('slot-id'), 10);
-          this.hotbar.hotbarService.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
+          this.hotbar.services.hotbarService.swapHotbarActions(sourceHotbarId, sourceSlotId, this.hotbarId, this.slotId);
           break;
 
         case 'action':
+          this.action = this.hotbar.services.gameDataService.getActionById(parseInt(actionId, 10));
           break;
 
         default:

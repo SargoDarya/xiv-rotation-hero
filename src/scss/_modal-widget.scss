@@ -1,3 +1,5 @@
+@import './mixins.scss';
+
 .modal-widget {
   position: absolute;
   top: 0;
@@ -29,11 +31,11 @@
 
 @keyframes animateFilter {
   0% {
-    backdrop-filter: blur(0px);
+    @include blur-background(0px);
   }
 
   100% {
-    backdrop-filter: blur(10px);
+    @include blur-background(10px);
   }
 }
 

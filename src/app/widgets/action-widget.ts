@@ -7,8 +7,11 @@ import { ImageWidget } from './image-widget.js';
 import { TextWidget } from './text-widget.js';
 import { HTMLWidget } from './html-widget.js';
 
-interface ActionWidgetConfiguration {
-  withCooldown: boolean
+export interface ActionWidgetConfiguration {
+  withCooldown: boolean,
+  isHotbarAssigned: boolean,
+  hotbarId: number,
+  slotId: number
 }
 
 export class ActionWidget extends ContainerWidget {
@@ -19,7 +22,11 @@ export class ActionWidget extends ContainerWidget {
 
   private readonly isHotbarAssignable: boolean;
 
-  constructor(private readonly action: Action, private readonly services: Services, configuration: Partial<ActionWidgetConfiguration> = {}) {
+  constructor(
+    private readonly action: Action,
+    private readonly services: Services,
+    private readonly configuration: Partial<ActionWidgetConfiguration> = {})
+  {
     super('action-widget');
 
     this.actionImageWidget.src = `https://xivapi.com${action.IconHD}`;
@@ -36,7 +43,15 @@ export class ActionWidget extends ContainerWidget {
 
     this.viewContainer.draggable = true;
     this.viewContainer.addEventListener('dragstart', (evt: DragEvent) => {
-      (<DataTransfer>evt.dataTransfer).setData('drag-type', `action`);
+      this.services.tooltipService.hideTooltip();
+
+      if (this.configuration.isHotbarAssigned && this.configuration.hotbarId !== undefined && this.configuration.slotId !== undefined) {
+        (<DataTransfer>evt.dataTransfer).setData('drag-type', 'slot-to-slot');
+        (<DataTransfer>evt.dataTransfer).setData('hotbar-id', this.configuration.hotbarId.toString(10));
+        (<DataTransfer>evt.dataTransfer).setData('slot-id', this.configuration.slotId.toString(10));
+      } else {
+        (<DataTransfer>evt.dataTransfer).setData('drag-type', 'action');
+      }
       (<DataTransfer>evt.dataTransfer).setData('action-id', `${this.action.ID}`);
       if (this.isHotbarAssignable) {
         (<DataTransfer>evt.dataTransfer).setData('is-hotbar-assignable', `${this.action.ID}`);

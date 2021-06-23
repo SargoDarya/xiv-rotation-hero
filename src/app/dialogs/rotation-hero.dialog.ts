@@ -23,7 +23,7 @@ export class RotationHeroDialog extends DialogBase {
     this.rotationHero = new RotationHero(this.services, false);
     this.isVisible = false;
 
-    this.contentContainer.appendChild(this.rotationHero.viewContainer);
+    this.appendContent(this.rotationHero);
 
     this.rotationHero.addEventListener('app-changeclassjob', (evt: CustomEvent<number>) => {
       this.services.appStateService.selectedClassJobID = evt.detail;

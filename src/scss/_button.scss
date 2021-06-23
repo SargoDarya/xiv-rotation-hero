@@ -1,0 +1,22 @@
+button {
+  background: none;
+  border: none;
+  color: #2f79a3;
+  cursor: pointer;
+  padding: 6px 0px;
+  font-size: inherit;
+  white-space: nowrap;
+
+  &:focus,
+  &:hover {
+    color: lighten(#2f79a3, 20%);
+  }
+
+  &:active {
+    color: lighten(#2f79a3, 40%);
+  }
+
+  &--selected {
+    color: lighten(#2f79a3, 30%);
+  }
+}

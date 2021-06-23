@@ -36,6 +36,10 @@ export class ACTRotationTrainer {
       // Load more stuff which is necessary to display
       // everything. This is done so the ACT overlay isn't
       // loading unnecessary scripts.
+      const styles = document.createElement('link');
+      styles.rel = 'stylesheet';
+      styles.href = './main.css';
+      document.head.appendChild(styles);
       import('./app/manual-ui/manual-ui.js').then(({ ManualUI }) => {
         const manualUI = new ManualUI(this.gameDataService);
         document.body.appendChild(manualUI.viewContainer);

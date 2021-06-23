@@ -1,15 +1,16 @@
+@import './mixins.scss';
+
 .dialog {
   border: 2px solid transparent;
   border-radius: 12px;
   overflow: hidden;
   display: none;
   position: absolute;
-  background: rgba(36, 36, 36, 0.6);
-  backdrop-filter: blur(10px);
   box-shadow: 0 5px 20px 5px rgba(0, 0, 0, 0.2);
   color: white;
   will-change: top, left;
   min-width: 300px;
+  @include blur-background(10px);
 
   &--focus {
     border: 2px solid goldenrod;
@@ -28,6 +29,10 @@
     padding: 4px 12px;
     line-height: 1.5;
     font-weight: bold;
+
+    &--empty {
+      display: none;
+    }
   }
 
   &__close-button {
@@ -44,6 +49,10 @@
       content: "\2716";
       font-size: 24px;
       text-shadow: 0 0 2px black;
+    }
+
+    &--hidden {
+      display: none;
     }
   }
 }

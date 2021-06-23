@@ -1,3 +1,5 @@
+@import './mixins.scss';
+
 .job-selection {
 
   &__active-job {
@@ -27,8 +29,7 @@
     padding: 6px 18px 6px 12px;
     color: white;
     align-items: center;
-    background: rgba(44, 44, 44, .6);
-    backdrop-filter: blur(10px);
+    @include blur-background(10px);
     cursor: pointer;
 
     &:nth-child(odd) {
@@ -36,7 +37,6 @@
     }
 
     &:hover {
-      // background: rgba(70, 70, 80, 1);
       background: rgba(0, 0, 0, 0.6);
     }
   }

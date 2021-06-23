@@ -1,17 +1,60 @@
-import { Services } from "../interfaces";
-import { ServiceBase } from "./service-base";
+import { Services } from "../interfaces.js";
+import { ServiceBase } from "./service-base.js";
+import { AppStateEvent } from './app-state.service.js';
 
-export class KeyBindingService implements ServiceBase {
+export enum KeyBindingEvent {
+  BindingRegistered = 'app-bindingregistered',
+  BindingChanged = 'app-bindingchanged'
+}
 
-  private availableBindings: { [ k: string ]: () => {} } = {};
-  private keyBindings: { [ k: string ]: string } = {};
-  private reverseMapping: { [ k: string ]: string } = {};
+export class KeyBindingService extends EventTarget implements ServiceBase {
 
-  constructor(private readonly services: Services) {}
+  private availableBindings: { [ label: string ]: () => {} } = {};
+  private labelToBindingMapping: { [ label: string ]: string } = {};
+  private bindingToLabelMapping: { [ binding: string ]: string } = {};
+
+  constructor(private readonly services: Services) {
+    super();
+  }
 
   public init() {
     this.loadKeyBindings();
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+
+  getAllKeyBindings() {
+    return this.labelToBindingMapping;
+  }
+
+  getAvailableKeyBindings() {
+    return this.availableBindings;
+  }
+
+  getBinding(label: string) {
+    return this.labelToBindingMapping[ label ];
+  }
+
+  setKeyBinding(label: string, binding: string) {
+    // Check if there was some other label assigned to the binding first
+    const oldBindingLabel = this.bindingToLabelMapping[ binding ];
+    const oldLabelBinding = this.labelToBindingMapping[ label ];
+    if (oldBindingLabel) {
+      delete this.labelToBindingMapping[oldBindingLabel];
+      delete this.bindingToLabelMapping[binding];
+      this.dispatchEvent(new CustomEvent(KeyBindingEvent.BindingChanged, { detail: oldBindingLabel }))
+    }
+    // Check if there was some other binding assigned to the label first
+    if (oldLabelBinding) {
+      delete this.bindingToLabelMapping[oldLabelBinding];
+      // Note that this does not need an extra event as it's dispatched below already
+    }
+
+    this.bindingToLabelMapping[ binding ] = label;
+    this.labelToBindingMapping[ label ] = binding;
+
+    this.dispatchEvent(new CustomEvent(KeyBindingEvent.BindingChanged, { detail: label }))
+
+    this.saveKeyBindings();
   }
 
   handleKeyDown(evt: KeyboardEvent): void {
@@ -21,26 +64,39 @@ export class KeyBindingService implements ServiceBase {
       return;
     }
 
-    const keys = [];
-    if (ctrlKey) keys.push('Ctrl');
-    if (shiftKey) keys.push('Shift');
-    if (altKey) keys.push('Alt');
-    keys.push(code);
+    const sequence = [];
+    if (ctrlKey) sequence.push('Ctrl');
+    if (shiftKey) sequence.push('Shift');
+    if (altKey) sequence.push('Alt');
 
-    const keyString = keys.join('+');
+    // Check if a number was pressed
+    const [,digitMatch] = evt.code.match(/Digit(\d)/) || [];
+    const [numpadMatch] = evt.code.match(/Numpad(\d)/g) || [];
+    if (digitMatch !== undefined) {
+      sequence.push(digitMatch);
+    } else if (numpadMatch !== undefined) {
+      sequence.push(numpadMatch);
+    } else {
+      sequence.push(code);
+    }
 
-    if (this.keyBindings[ keyString ]) {
-      this.availableBindings[ this.keyBindings[ keyString ] ]();
+
+    const keyString = sequence.join('+');
+
+    if (this.bindingToLabelMapping[ keyString ]) {
+      this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
     }
   }
 
-  registerAvailableBindings(action: string, keyDefault: string | undefined, cb: () => any): void {
-    this.availableBindings[ action ] = cb;
+  registerAvailableBindings(label: string, keyDefault: string | undefined, cb: () => any): void {
+    this.availableBindings[ label ] = cb;
 
-    if (keyDefault && !Object.values(this.keyBindings).includes(action)) {
-      this.keyBindings[ keyDefault ] = action;
-      this.reverseMapping[ action ] = keyDefault;
+    if (keyDefault && !Object.values(this.bindingToLabelMapping).includes(label)) {
+      this.bindingToLabelMapping[ keyDefault ] = label;
+      this.labelToBindingMapping[ label ] = keyDefault;
     }
+
+    this.dispatchEvent(new CustomEvent(KeyBindingEvent.BindingRegistered, { detail: label }));
   }
 
   loadKeyBindings(): void {
@@ -50,7 +106,7 @@ export class KeyBindingService implements ServiceBase {
       // this.keyBindings = [];
     } else {
       const keyBindings = JSON.parse(savedKeyBindings);
-      this.keyBindings = {}
+      this.bindingToLabelMapping = {}
     }
   }
 

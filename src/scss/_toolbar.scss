@@ -1,7 +1,9 @@
+@import './mixins.scss';
+
 .toolbar {
   display: flex;
+  @include blur-background(10px);
   background: rgba(40, 40, 50, 0.85);
-  backdrop-filter: blur(10px);
   box-shadow: 0 8px 10px 0 rgba(0, 0, 0, .2);
 
   & .toggle-widget {

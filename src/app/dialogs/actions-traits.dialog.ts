@@ -32,7 +32,7 @@ export class ActionsTraitsDialog extends DialogBase {
     this.actionsContainer.remove(...this.actionsWidgets);
 
     if (classJobId === -1) {
-      this.contentContainer.innerText = 'Select a Job to get started.';
+      // this.contentContainer. = 'Select a Job to get started.';
       return;
     }
 

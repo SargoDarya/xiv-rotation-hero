@@ -1,8 +1,11 @@
-import { ActionService } from "../services/action.service.js";
-import { HotbarService } from "../services/hotbar.service.js";
 import { HotbarSlot } from "./hotbar-slot.js";
-import { Action } from "../interfaces.js";
-import { createView } from "../utils.js";
+import {
+  Action,
+  Services
+} from "../interfaces.js";
+import { WidgetBase } from '../widgets/widget-base.js';
+import { ContainerWidget } from '../widgets/container-widget.js';
+import { TextWidget } from '../widgets/text-widget.js';
 
 export enum HotbarStyle {
   Horizontal = '12x1',
@@ -20,10 +23,9 @@ export interface HotbarOptions {
   scale: number;
 }
 
-export class Hotbar {
-  private viewContainer: HTMLElement = createView('div', 'hotbar');
-  private hotbarNumberContainer: HTMLElement = createView('div', 'hotbar__number');
-  private slotContainer: HTMLElement = createView('div', 'hotbar__slots');
+export class Hotbar extends WidgetBase {
+  private hotbarNumberContainer = new TextWidget('', 'hotbar__number');
+  private slotContainer = new ContainerWidget('hotbar__slots');
   private hotbarSlots: HotbarSlot[] = [];
 
   private lastMousePosition: [ number, number ];
@@ -41,12 +43,7 @@ export class Hotbar {
     return this.options.visible;
   }
   set visible(visible: boolean) {
-    if (visible) {
-      this.viewContainer.classList.add('hotbar--visible');
-    } else {
-      this.viewContainer.classList.remove('hotbar--visible');
-    }
-
+    this.toggleModifier('visible', visible);
     this.options.visible = visible;
   }
 
@@ -55,8 +52,8 @@ export class Hotbar {
   }
   set hotbarStyle(style: HotbarStyle) {
     // Remove old class before adding new class
-    this.viewContainer.classList.remove(this.getHotbarStyleClass(this.hotbarStyle));
-    this.viewContainer.classList.add(this.getHotbarStyleClass(style));
+    this.removeModifier(this.hotbarStyle);
+    this.addModifier(style);
     this.options.hotbarStyle = style;
   }
 
@@ -69,28 +66,29 @@ export class Hotbar {
   }
 
   constructor(
-      private readonly id: number,
-      public readonly hotbarService: HotbarService,
-      public readonly actionService: ActionService,
-      // Options are passed in as reference only for automatic changes on hotbars
-      private readonly options: HotbarOptions) {
+    public readonly services: Services,
+    private readonly id: number,
+    // Options are passed in as reference only for automatic changes on hotbars
+    private readonly options: HotbarOptions
+  ) {
+    super('hotbar');
 
     // Bind event listener so it keeps the context
     this.onMouseDragStop = this.onMouseDragStop.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
 
-    this.hotbarNumberContainer.innerText = (this.id + 1).toString();
-    this.hotbarNumberContainer.addEventListener('mousedown', this.onMouseDragStart.bind(this));
-    this.viewContainer.appendChild(this.hotbarNumberContainer);
-    this.viewContainer.appendChild(this.slotContainer);
-
-    document.body.appendChild(this.viewContainer);
+    this.hotbarNumberContainer.text = (this.id + 1).toString();
+    this.hotbarNumberContainer.viewContainer.addEventListener('mousedown', this.onMouseDragStart.bind(this));
+    this.append(
+      this.hotbarNumberContainer,
+      this.slotContainer
+    );
 
     // Generate slots
     for (let slotId = 0; slotId < 12; slotId++) {
       const hotbarSlot = new HotbarSlot(this, this.id, slotId);
       this.hotbarSlots.push(hotbarSlot);
-      this.slotContainer.appendChild(hotbarSlot.view);
+      this.slotContainer.append(hotbarSlot);
     }
 
     // Apply options
@@ -121,29 +119,6 @@ export class Hotbar {
    */
   getSlotActionIds() {
     return this.hotbarSlots.map((slot) => slot.action ? slot.action.ID : null);
-  }
-
-  getHotbarStyleClass(hotbarStyle: HotbarStyle) {
-    switch (hotbarStyle) {
-      default:
-      case HotbarStyle.Horizontal:
-        return 'hotbar--12x1';
-
-      case HotbarStyle.SplitHorizontal:
-        return 'hotbar--6x2';
-
-      case HotbarStyle.DoubleSplitHorizontal:
-        return 'hotbar--4x3';
-
-      case HotbarStyle.DoubleSplitVertical:
-        return 'hotbar--3x4';
-
-      case HotbarStyle.SplitVertical:
-        return 'hotbar--2x6';
-
-      case HotbarStyle.Vertical:
-        return 'hotbar--1x12';
-    }
   }
 
   onMouseDragStart(evt: MouseEvent): void {
@@ -181,7 +156,7 @@ export class Hotbar {
     document.removeEventListener('mouseup', this.onMouseDragStop);
     document.removeEventListener('mousemove', this.onMouseMove);
 
-    this.hotbarService.persistSettings();
+    this.services.hotbarService.persistSettings();
   }
 
 }

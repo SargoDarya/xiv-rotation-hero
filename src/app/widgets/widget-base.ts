@@ -43,8 +43,15 @@ export class WidgetBase extends EventTarget {
       this.classList.remove(`${this.widgetClassName}--${modifier}`);
     });
   }
-  public toggleModifier(modifier: string) {
-    this.classList.toggle(`${this.widgetClassName}--${modifier}`);
+  public toggleModifier(modifier: string, force?: boolean) {
+    if (typeof force !== 'undefined') {
+      force
+        ? this.classList.add(`${this.widgetClassName}--${modifier}`)
+        : this.classList.remove(`${this.widgetClassName}--${modifier}`)
+
+    } else {
+      this.classList.toggle(`${this.widgetClassName}--${modifier}`);
+    }
   }
 
   public append(...widgets: WidgetBase[]): void {
@@ -58,6 +65,7 @@ export class WidgetBase extends EventTarget {
   public remove(...widgets: WidgetBase[]): void {
     widgets.forEach((widget) => {
       this.children.delete(widget);
+
       this.viewContainer.removeChild(widget.viewContainer);
     });
   }

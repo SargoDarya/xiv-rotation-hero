@@ -27,6 +27,7 @@ import { API } from '../api.js';
 import { ModalWidget } from '../widgets/modal-widget.js';
 import { User } from '../rotation-hero/interfaces.js';
 import { TooltipService } from '../services/tooltip.service.js';
+import { KeybindingDialog } from '../dialogs/keybinding.dialog.js';
 
 export class ManualUI extends WidgetBase {
   private readonly services: Partial<Services> = {};
@@ -44,7 +45,8 @@ export class ManualUI extends WidgetBase {
     HotbarLayoutDialog,
     ActionsTraitsDialog,
     RotationHeroDialog,
-    RotationBuilderDialog
+    RotationBuilderDialog,
+    KeybindingDialog
   ];
   private readonly dialogInstances: Map<any, DialogBase> = new Map();
 

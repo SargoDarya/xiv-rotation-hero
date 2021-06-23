@@ -1,6 +1,10 @@
-import { HotbarSlot } from "../manual-ui/hotbar-slot";
-import { Action, Services } from "../interfaces";
-import { ServiceBase } from "./service-base";
+import { HotbarSlot } from "../manual-ui/hotbar-slot.js";
+import { Action, Services } from "../interfaces.js";
+import { ServiceBase } from "./service-base.js";
+import {
+  ActionWidget,
+  ActionWidgetConfiguration
+} from '../widgets/action-widget.js';
 
 interface CooldownGroup {
   start: number;
@@ -20,7 +24,12 @@ export class ActionService extends EventTarget implements ServiceBase {
     super();
   }
 
-  init() {};
+  init() {}
+
+  getActionWidget(actionId: number, configuration: Partial<ActionWidgetConfiguration> = {}) {
+    const action = this.services.gameDataService.getActionById(actionId);
+    return new ActionWidget(action, this.services, configuration);
+  }
 
   registerSlot(slot: HotbarSlot): void {
     this.hotbarSlots.push(slot);

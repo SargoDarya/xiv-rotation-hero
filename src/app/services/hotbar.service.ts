@@ -3,6 +3,7 @@ import { Action, Services } from "../interfaces.js";
 import { CrossHotbar } from "../manual-ui/cross-hotbar.js";
 import { ServiceBase } from "./service-base.js";
 import { AppStateEvent } from "./app-state.service.js";
+import { ContainerWidget } from '../widgets/container-widget.js';
 
 interface HotbarAllocation {
   hotbars: [number[],number[],number[],number[],number[],number[],number[],number[],number[],number[]];
@@ -14,18 +15,19 @@ export class HotbarService implements ServiceBase {
   public crossHotbar: CrossHotbar;
 
   private readonly HOTBAR_PERSISTANCE_KEY = 'hotbar-allocation-';
+  private readonly hotbarContainerWidget = new ContainerWidget('hotbars');
   private hotbarSettings: HotbarOptions[];
   private HOTBAR_KEYS = [
-    'Digit1',
-    'Digit2',
-    'Digit3',
-    'Digit4',
-    'Digit5',
-    'Digit6',
-    'Digit7',
-    'Digit8',
-    'Digit9',
-    'Digit0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '0',
     'KeyA',
     'KeyB'
   ];
@@ -35,6 +37,7 @@ export class HotbarService implements ServiceBase {
 
   public init() {
     this.hotbarSettings = this.loadSettings();
+    document.body.appendChild(this.hotbarContainerWidget.viewContainer);
     this.constructHotbars();
 
     this.crossHotbar = new CrossHotbar(this.services);
@@ -54,21 +57,23 @@ export class HotbarService implements ServiceBase {
     const hotbars: Hotbar[] = [];
 
     for (let i=0; i<10; i++) {
-      let keyModifier = '';
+      let sequence: string[] = [];
 
       switch (i) {
-        case 1: keyModifier = 'Ctrl+'; break;
-        case 2: keyModifier = 'Shift+'; break;
-        case 3: keyModifier = 'Alt+'; break;
+        case 1: sequence.push('Ctrl'); break;
+        case 2: sequence.push('Shift'); break;
+        case 3: sequence.push('Alt'); break;
       }
 
-      const hotbar = new Hotbar(i, this, this.services.actionService, this.hotbarSettings[ i ]);
+      const hotbar = new Hotbar(this.services, i, this.hotbarSettings[ i ]);
       hotbars.push(hotbar);
+
+      this.hotbarContainerWidget.append(hotbar);
 
       for (let k=0; k<12; k++) {
         this.services.keyBindingService.registerAvailableBindings(
-          `Hotbar${i+1} Action${k+1}`,
-          i < 4 ? `${keyModifier}${this.HOTBAR_KEYS[k]}` : undefined,
+          `Hotbar ${i+1} - Slot ${k+1}`,
+          i < 4 ? [...sequence, this.HOTBAR_KEYS[k]].join('+') : undefined,
           () => {
             hotbar.trigger.call(hotbar, k);
           }

@@ -2,6 +2,7 @@ import { DialogBase } from "./dialog-base.js";
 import { HotbarStyle } from "../manual-ui/hotbar.js";
 import { createCheckbox, createRadio, createSelect, createView, wrapForStyle } from "../utils.js";
 import { Services } from "../interfaces.js";
+import { HTMLWidget } from '../widgets/html-widget.js';
 
 export class HotbarLayoutDialog extends DialogBase {
   public uiTitle = 'Hotbar Layout';
@@ -12,6 +13,7 @@ export class HotbarLayoutDialog extends DialogBase {
     super(services);
 
     this.title = 'Hotbar Layout';
+    this.dialogClass = 'hotbar-layout-dialog';
 
     this.createView();
     this.afterViewCreated();
@@ -85,12 +87,16 @@ export class HotbarLayoutDialog extends DialogBase {
         radio.addEventListener('change', (evt: Event) => {
           if (evt.target) {
             hotbar.hotbarStyle = <HotbarStyle>(<HTMLInputElement>evt.target).value;
+            this.services.hotbarService.persistSettings();
           }
         });
       });
     });
 
-    this.contentContainer.appendChild(hotbarSettings);
+    const htmlWidget = new HTMLWidget();
+    htmlWidget.viewContainer.appendChild(hotbarSettings);
+
+    this.appendContent(htmlWidget);
   }
 
   private createHeaderRow(headers: string[]) {
