@@ -51,6 +51,8 @@ export class AppStateService extends EventTarget implements ServiceBase {
     return this._loggedInUser;
   }
 
+  public readonly userToken: string | null;
+
   constructor() {
     super();
 
@@ -60,9 +62,13 @@ export class AppStateService extends EventTarget implements ServiceBase {
     this.addEventListener(AppStateEvent.UserLogin, (evt: CustomEvent<User>) => {
       this._loggedInUser = evt.detail;
     });
-    this.addEventListener(AppStateEvent.UserLogout, (evt: CustomEvent<undefined>) => {
+
+    this.addEventListener(AppStateEvent.UserLogout, () => {
       this._loggedInUser = null;
     });
+
+    const userTokenMatch = window.location.search.match(/[?&]token=([^&]+)/);
+    this.userToken = userTokenMatch ? userTokenMatch[ 1 ] : null;
   }
 
   init() {}

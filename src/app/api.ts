@@ -69,6 +69,10 @@ export class API {
     return this.request(`/rotation/${rotationId}/favourite`, 'POST', '').then(response => response.json());
   }
 
+  static async favoriteRotationWithToken(rotationId: string, token: string): Promise<FavouriteResponse> {
+    return this.request(`/rotation/${rotationId}/favourite/token/${token}`, 'POST', '').then(response => response.json());
+  }
+
   static async getRotation(rotationId: string): Promise<Rotation> {
     return this.request(`/rotation/${rotationId}`, 'GET').then(response => response.json());
   }

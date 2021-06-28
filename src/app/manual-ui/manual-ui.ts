@@ -49,6 +49,7 @@ export class ManualUI extends WidgetBase {
     KeybindingDialog
   ];
   private readonly dialogInstances: Map<any, DialogBase> = new Map();
+  private readonly dialogContainer = new ContainerWidget('dialogs');
 
   private readonly toolbarWidget = new ContainerWidget('toolbar');
   private toolbarUserButton: ButtonWidget;
@@ -60,12 +61,12 @@ export class ManualUI extends WidgetBase {
   private activeJobAbbreviationTextWidget: TextWidget;
   private jobToggleWidget: ToggleWidget;
 
-  constructor(gameDataService: GameDataService) {
+  constructor(gameDataService: GameDataService, appStateService: AppStateService) {
     super('manual-ui', 'div');
 
     // Create all the services
     this.services.actionService = new ActionService(<Services>this.services);
-    this.services.appStateService = new AppStateService();
+    this.services.appStateService = appStateService;
     this.services.gameDataService = gameDataService;
     this.services.gamepadService = new GamepadService(<Services>this.services);
     this.services.hotbarService = new HotbarService(<Services>this.services);
@@ -145,6 +146,7 @@ export class ManualUI extends WidgetBase {
     this.createJobSelectionView();
 
     // Instantiate dialogs
+    this.append(this.dialogContainer);
     this.createDialogs();
   }
 
@@ -165,7 +167,7 @@ export class ManualUI extends WidgetBase {
         }
       );
       this.toolbarWidget.append(toolbarButtonWidget);
-      this.append(dialogInstance);
+      this.dialogContainer.append(dialogInstance);
       this.dialogInstances.set(dialogClass, dialogInstance);
     });
 
@@ -174,7 +176,7 @@ export class ManualUI extends WidgetBase {
 
   private createUserDialog() {
     const userDialog = new UserDialog(<Services>this.services);
-    this.append(userDialog);
+    this.dialogContainer.append(userDialog);
     this.dialogInstances.set(UserDialog, userDialog);
     this.toolbarUserButton = new ButtonWidget(
       userDialog.uiTitle,

@@ -167,11 +167,11 @@ export abstract class DialogBase extends WidgetBase {
   }
 
   private updatePosition(x: number, y: number) {
-    this.viewContainer.style.left = x + 'px';
-    this.viewContainer.style.top = y + 'px';
+    this.viewContainer.style.left = Math.max(x, 0) + 'px';
+    this.viewContainer.style.top = Math.max(y, 0) + 'px';
   }
 
-  private onMouseDragStop(evt: MouseEvent): void {
+  private onMouseDragStop(): void {
     document.removeEventListener('mouseup', this.onMouseDragStop);
     document.removeEventListener('mousemove', this.onMouseMove);
   }

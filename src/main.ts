@@ -3,6 +3,7 @@ import { OverlayPluginLayer } from "./app/services/overlay-plugin-layer.js";
 import { RotationHero } from "./app/rotation-hero/rotation-hero.js";
 import { WebsocketLayer } from "./app/services/websocket-layer.js";
 import { GameDataService } from "./app/services/game-data.service.js";
+import { AppStateService } from "./app/services/app-state.service.js";
 
 /**
  * This is the main class which is bootstrapping the application.
@@ -14,6 +15,7 @@ import { GameDataService } from "./app/services/game-data.service.js";
 export class ACTRotationTrainer {
   private communicationLayer: CommunicationLayer | null;
   private gameDataService = new GameDataService();
+  private appStateService = new AppStateService();
 
   constructor() {
     // Load all necessary data first before initialising anything.
@@ -41,13 +43,16 @@ export class ACTRotationTrainer {
       styles.href = './main.css';
       document.head.appendChild(styles);
       import('./app/manual-ui/manual-ui.js').then(({ ManualUI }) => {
-        const manualUI = new ManualUI(this.gameDataService);
+        const manualUI = new ManualUI(this.gameDataService, this.appStateService);
         document.body.appendChild(manualUI.viewContainer);
         manualUI.startTicking();
       });
     } else {
       // Handle action recording in here
-      const rotationHero = new RotationHero({ gameDataService: this.gameDataService });
+      const rotationHero = new RotationHero({
+        gameDataService: this.gameDataService,
+        appStateService: this.appStateService
+      });
       document.body.appendChild(rotationHero.viewContainer);
 
       this.communicationLayer.addOverlayListener('LogLine', (evt: LogLineEvent) => {

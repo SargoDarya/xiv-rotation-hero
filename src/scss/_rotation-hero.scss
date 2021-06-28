@@ -4,9 +4,16 @@ $border-thickness: 4px;
 $border-length: 16px;
 
 .rotation-hero {
+  position: relative;
   color: white;
-  background: rgba(0, 0, 0, 0.7);
-  min-width: 400px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__content {
+    background: rgba(0, 0, 0, 0.7);
+    flex-grow: 1;
+  }
 
   &__title-bar {
     display: flex;
@@ -51,7 +58,7 @@ $border-length: 16px;
     flex: 0 0 100%;
     position: relative;
     will-change: left;
-    left: 0px;
+    left: 0;
     transition: left .5s;
   }
 
@@ -111,7 +118,7 @@ $border-length: 16px;
       background: linear-gradient(90deg, $border-color 50%, transparent 50%), linear-gradient(90deg, $border-color 50%, transparent 50%), linear-gradient(0deg, $border-color 50%, transparent 50%), linear-gradient(0deg, $border-color 50%, transparent 50%);
       background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
       background-size: $border-length $border-thickness, $border-length $border-thickness, $border-thickness $border-length, $border-thickness $border-length;
-      background-position: 0px 0px, $action-size $action-size, 0px $action-size, $action-size 0px;
+      background-position: 0 0, $action-size $action-size, 0 $action-size, $action-size 0;
       animation: border-dance 4s infinite linear;
     }
   }
@@ -177,9 +184,9 @@ $border-length: 16px;
 
 @keyframes border-dance {
   0% {
-    background-position: 0px 0px, $action-size $action-size, 0px $action-size, $action-size 0px;
+    background-position: 0 0, $action-size $action-size, 0 $action-size, $action-size 0;
   }
   100% {
-    background-position: $action-size 0px, 0px $action-size, 0px 0px, $action-size $action-size;
+    background-position: $action-size 0, 0 $action-size, 0 0, $action-size $action-size;
   }
 }

@@ -1,19 +1,15 @@
-import { WidgetBase } from '../widgets/widget-base.js';
-import {
-  RotationBrowserCategoryType,
-  RotationBrowserSubCategoryType
-} from './enums.js';
-import { ButtonWidget } from '../widgets/button-widget.js';
-import { ContainerWidget } from '../widgets/container-widget.js';
-import { Rotation } from './interfaces.js';
-import {
-  API,
-  PaginatedResponse
-} from '../api.js';
-import { TextWidget } from '../widgets/text-widget.js';
-import { GameDataService } from '../services/game-data.service.js';
-import { ImageWidget } from '../widgets/image-widget.js';
-import { Job } from '../interfaces.js';
+import {WidgetBase} from '../widgets/widget-base.js';
+import {RotationBrowserCategoryType, RotationBrowserSubCategoryType} from './enums.js';
+import {ButtonWidget} from '../widgets/button-widget.js';
+import {ContainerWidget} from '../widgets/container-widget.js';
+import {Rotation} from './interfaces.js';
+import {API, PaginatedResponse} from '../api.js';
+import {TextWidget} from '../widgets/text-widget.js';
+import {ImageWidget} from '../widgets/image-widget.js';
+import {Job} from '../interfaces.js';
+import {ModalWidget} from "../widgets/modal-widget.js";
+import {AppStateService} from "../services/app-state.service";
+import {GameDataService} from "../services/game-data.service";
 
 /**
  *
@@ -34,15 +30,8 @@ export class RotationBrowserView extends WidgetBase {
   private readonly loadingTextWidget: TextWidget;
   private readonly emptyViewTextWidget: TextWidget;
 
-  private readonly userToken?: string;
-
-  constructor(private readonly gameDataService: GameDataService) {
+  constructor(private readonly services: { appStateService: AppStateService, gameDataService: GameDataService }) {
     super('rotation-browser');
-
-    const userTokenMatch = window.location.search.match(/[\?&]token=([^&]+)/);
-    if (userTokenMatch) {
-      this.userToken = userTokenMatch[ 1 ];
-    }
 
     this.mainTabBarWidgets = [
       new ButtonWidget('Community', 'rotation-browser__button', { click: this.selectBrowserCategory.bind(this, RotationBrowserCategoryType.Community, RotationBrowserSubCategoryType.Favorites )}),
@@ -76,6 +65,14 @@ export class RotationBrowserView extends WidgetBase {
     if (this.activeBrowserCategory === category && this.activeBrowserSubCategory === subCategory) {
       return;
     }
+
+    // Check if the user can access it
+    if (!this.services.appStateService.loggedInUser && category !== RotationBrowserCategoryType.Community && !this.services.appStateService.userToken) {
+      // Show warning
+      this.append(new ModalWidget(new TextWidget('You need to be logged in to access your favorites and own rotations.')))
+      return;
+    }
+
     this.activeBrowserCategory = category;
     this.activeBrowserSubCategory = subCategory;
 
@@ -124,14 +121,14 @@ export class RotationBrowserView extends WidgetBase {
   }
 
   private getUserRotations() {
-    return this.userToken
-      ? API.userTokenRotations(this.userToken)
+    return this.services.appStateService.userToken
+      ? API.userTokenRotations(this.services.appStateService.userToken)
       : API.userRotations();
   }
 
   private getUserFavorites() {
-    return this.userToken
-      ? API.userTokenFavourites(this.userToken)
+    return this.services.appStateService.userToken
+      ? API.userTokenFavourites(this.services.appStateService.userToken)
       : API.userFavourites();
   }
 
@@ -148,7 +145,7 @@ export class RotationBrowserView extends WidgetBase {
 
   private createRotationListItemView(rotations: Rotation[]): ContainerWidget[] {
     return rotations.map((rotation) => {
-      const classJob = <Job>this.gameDataService.getClassJob(rotation.classJobId);
+      const classJob = <Job>this.services.gameDataService.getClassJob(rotation.classJobId);
 
       return new ContainerWidget(
         'rotation-browser__list-item',

@@ -3,6 +3,8 @@ import { Rotation } from './interfaces.js';
 import { TextWidget } from '../widgets/text-widget.js';
 import { ButtonWidget } from '../widgets/button-widget.js';
 import { API } from '../api.js';
+import {AppStateService} from "../services/app-state.service.js";
+import {ModalWidget} from "../widgets/modal-widget.js";
 
 export class ActiveRotationSummaryView extends WidgetBase {
   private _rotation: Rotation | null;
@@ -22,7 +24,9 @@ export class ActiveRotationSummaryView extends WidgetBase {
   private readonly changeSetButtonWidget = new ButtonWidget('Change set', 'active-rotation-summary__change-set', { click: this.dispatchEvent.bind(this, new CustomEvent('app-clearrotation')) });
   private readonly favoritesButtonWidget = new ButtonWidget('', 'active-rotation-summary__favourites', { click: this.toggleFavorite.bind(this) });
 
-  constructor() {
+  constructor(
+      private readonly services: { appStateService: AppStateService }
+  ) {
     super('active-rotation-summary');
 
     this.append(
@@ -36,11 +40,22 @@ export class ActiveRotationSummaryView extends WidgetBase {
   }
 
   private async toggleFavorite() {
-    if (this.rotation) {
-      const newFavoriteCount = await API.favoriteRotation(this.rotation.id)
-      this.favoritesButtonWidget.html = `${newFavoriteCount.favouriteCount} &#9829;`;
+    if (!this.services.appStateService.userToken && !this.services.appStateService.loggedInUser) {
+      this.append(new ModalWidget(new TextWidget('You need to be logged in to favourite rotations.')));
+      return;
     }
 
+    if (this.rotation) {
+      let newFavouriteCount: { favouriteCount: number };
+
+      if (this.services.appStateService.userToken) {
+        newFavouriteCount = await API.favoriteRotationWithToken(this.rotation.id, this.services.appStateService.userToken);
+      } else {
+        newFavouriteCount = await API.favoriteRotation(this.rotation.id);
+      }
+
+      this.favoritesButtonWidget.html = `${newFavouriteCount.favouriteCount} &#9829;`;
+    }
   }
 
   private updateView() {
@@ -57,4 +72,4 @@ export class ActiveRotationSummaryView extends WidgetBase {
     this.authorTextWidget.text = 'someone';
     this.favoritesButtonWidget.html = `${r.favouriteCount} &#9829;`;
   }
-};
+}

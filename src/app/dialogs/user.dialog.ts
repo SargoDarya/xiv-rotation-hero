@@ -22,11 +22,9 @@ export enum UserDialogActiveViewEnum {
 export class UserDialog extends DialogBase {
   public readonly uiTitle = 'Sign in / Sign up';
 
-  private activeView: UserDialogActiveViewEnum = UserDialogActiveViewEnum.SignIn;
-
-  private readonly userIdTextWidget: TextWidget = new TextWidget('');
-  private readonly userNameTextWidget: TextWidget = new TextWidget('');
-  private readonly userACTOverlayURLTextWidget: TextWidget = new TextWidget('');
+  private readonly userIdTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
+  private readonly userNameTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
+  private readonly userACTOverlayURLTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
 
   private readonly signInView: ContainerWidget = this.createSignInView();
   private readonly signUpView: ContainerWidget = this.createSignUpView();

@@ -1,5 +1,4 @@
 import { GameDataService } from "../services/game-data.service.js";
-import { createView } from "../utils.js";
 import { WidgetBase } from '../widgets/widget-base.js';
 import { ContainerWidget } from '../widgets/container-widget.js';
 import { TextWidget } from '../widgets/text-widget.js';
@@ -8,6 +7,7 @@ import { RotationBrowserView } from "./rotation-browser-view.js";
 import { RotationPhasesView } from "./rotation-phases-view.js";
 import { ToggleWidget } from '../widgets/toggle-widget.js';
 import { ActiveRotationSummaryView } from './active-rotation-summary-view.js';
+import {AppStateService} from "../services/app-state.service";
 
 
 export class RotationHero extends WidgetBase {
@@ -20,8 +20,7 @@ export class RotationHero extends WidgetBase {
 
   private rotationPresets: Rotation[] = [];
   private rotationPhasesView: RotationPhasesView;
-  private presetContainer = <HTMLSelectElement>createView('select', 'rotation-hero__preset-select');
-  private activeRotationSummaryView: ActiveRotationSummaryView = new ActiveRotationSummaryView();
+  private activeRotationSummaryView: ActiveRotationSummaryView;
   private rotationBrowserView: RotationBrowserView;
   private currentClassJobId: number;
 
@@ -36,14 +35,15 @@ export class RotationHero extends WidgetBase {
   }
 
   constructor(
-    private readonly services: { gameDataService: GameDataService },
+    private readonly services: { appStateService: AppStateService, gameDataService: GameDataService },
     isEmbedded: boolean = true
   ) {
     super('rotation-hero');
 
     this.gameDataService = services.gameDataService;
 
-    this.rotationBrowserView = new RotationBrowserView(this.services.gameDataService);
+    this.activeRotationSummaryView = new ActiveRotationSummaryView(this.services);
+    this.rotationBrowserView = new RotationBrowserView(this.services);
     this.rotationPhasesView = new RotationPhasesView(this.services.gameDataService);
 
     const contentContainer = new ContainerWidget('rotation-hero__content');
@@ -62,7 +62,6 @@ export class RotationHero extends WidgetBase {
     );
 
     this.rotationBrowserView.addEventListener('app-rotationselected', (evt: CustomEvent<Rotation>) => {
-      console.log('selecting rotation', evt.detail);
       this.selectRotation(evt.detail);
     });
 
