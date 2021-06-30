@@ -5,7 +5,7 @@ import { Services } from "../interfaces.js";
 import { HTMLWidget } from '../widgets/html-widget.js';
 
 export class HotbarLayoutDialog extends DialogBase {
-  public uiTitle = 'Hotbar Layout';
+  public uiTitle = 'Hotbars';
 
   constructor(
     services: Services

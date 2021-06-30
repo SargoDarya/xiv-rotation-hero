@@ -25,7 +25,7 @@ import { ToggleWidget } from '../widgets/toggle-widget.js';
 
 
 export class RotationBuilderDialog extends DialogBase {
-  public uiTitle = 'Rotation Builder';
+  public uiTitle = 'Builder';
 
   private _actions: Action[] = [];
   set actions(actions: Action[]) {

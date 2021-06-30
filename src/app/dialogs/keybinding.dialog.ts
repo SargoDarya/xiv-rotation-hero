@@ -5,7 +5,7 @@ import { TextWidget } from '../widgets/text-widget.js';
 import { KeyBindingEvent } from '../services/key-binding.service.js';
 
 export class KeybindingDialog extends DialogBase {
-  public uiTitle = 'Keybindings';
+  public uiTitle = 'Keybinds';
 
   constructor(services: Services) {
     super(services);

@@ -42,9 +42,9 @@ export class ManualUI extends WidgetBase {
   private readonly tooltipService: TooltipService;
 
   private readonly DIALOGS: ((new (services: Services) => DialogBase) & Omit<typeof DialogBase, never>)[] = [
+    RotationHeroDialog,
     HotbarLayoutDialog,
     ActionsTraitsDialog,
-    RotationHeroDialog,
     RotationBuilderDialog,
     KeybindingDialog
   ];
@@ -70,7 +70,7 @@ export class ManualUI extends WidgetBase {
     this.services.gameDataService = gameDataService;
     this.services.gamepadService = new GamepadService(<Services>this.services);
     this.services.hotbarService = new HotbarService(<Services>this.services);
-    this.services.keyBindingService = new KeyBindingService(<Services>this.services);
+    this.services.keyBindingService = new KeyBindingService();
     this.services.tooltipService = new TooltipService();
 
     // Local accessors

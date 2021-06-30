@@ -7,7 +7,7 @@ import { ActionWidget } from '../widgets/action-widget.js';
 import { WidgetBase } from '../widgets/widget-base';
 
 export class ActionsTraitsDialog extends DialogBase {
-  public uiTitle = 'Actions & Traits';
+  public uiTitle = 'Actions';
   private readonly actionsContainer = new ContainerWidget('actions-traits-dialog__actions', {}, []);
   private readonly actionsWidgets: WidgetBase[] = [];
 
