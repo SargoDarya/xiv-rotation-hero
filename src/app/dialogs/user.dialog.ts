@@ -21,31 +21,18 @@ export enum UserDialogActiveViewEnum {
 
 export class UserDialog extends DialogBase {
   public readonly uiTitle = 'Sign in / Sign up';
+  public activeView: ContainerWidget;
 
   private readonly userIdTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
   private readonly userNameTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
   private readonly userACTOverlayURLTextWidget: TextWidget = new TextWidget('', 'user-dialog__text');
 
-  private readonly signInView: ContainerWidget = this.createSignInView();
-  private readonly signUpView: ContainerWidget = this.createSignUpView();
-  private readonly userView: ContainerWidget = this.createUserView();
-  private readonly signUpSuccessView: ContainerWidget = this.createSignUpSuccessView();
+  private readonly userDialogContent: ContainerWidget = new ContainerWidget('user-dialog__content');
 
   constructor(services: Services) {
     super(services);
 
-    this.title = 'Sign in';
-
-    this.signUpView.hide();
-    this.userView.hide();
-    this.signUpSuccessView.hide();
-
-    this.append(new ContainerWidget('user-dialog__content', {}, [
-      this.signInView,
-      this.signUpView,
-      this.userView,
-      this.signUpSuccessView
-    ]));
+    this.append(this.userDialogContent);
 
     this.viewContainer.addEventListener('keydown', (evt) => {
       evt.stopImmediatePropagation();
@@ -53,40 +40,43 @@ export class UserDialog extends DialogBase {
 
     this.services.appStateService.addEventListener(AppStateEvent.UserLogin, this.onUserLogin.bind(this));
 
+    this.changeActiveView(UserDialogActiveViewEnum.SignIn);
+
     this.afterViewCreated();
   }
 
   public changeActiveView(view: UserDialogActiveViewEnum) {
+    // Remove previous view
+    if (this.activeView) {
+      this.userDialogContent.remove(this.activeView);
+    }
+
     switch(view) {
       case UserDialogActiveViewEnum.SignIn:
         this.title = 'Sign in';
-        this.signUpView.hide();
-        this.signInView.show();
-        this.signUpSuccessView.hide();
-        this.userView.hide();
+        this.activeView = this.createSignInView();
         break;
 
       case UserDialogActiveViewEnum.SignUp:
         this.title = 'Sign up';
-        this.signUpView.show();
-        this.signInView.hide();
+        this.activeView = this.createSignUpView();
         break;
 
       case UserDialogActiveViewEnum.SignUpSuccess:
         this.title = 'Success';
-        this.signUpSuccessView.show();
-        this.signUpView.hide();
+        this.activeView = this.createSignUpSuccessView();
         break;
 
       case UserDialogActiveViewEnum.SignInSuccess:
-        this.signInView.hide();
-        this.signUpView.hide();
-        this.userView.show();
+        this.activeView = this.createUserView();
         break;
 
       default:
         break;
     }
+
+    // Show new view
+    this.userDialogContent.append(this.activeView);
   }
 
   private createSignUpView() {
@@ -142,8 +132,12 @@ export class UserDialog extends DialogBase {
 
   private async onRegistrationSubmit(evt: Event) {
     evt.preventDefault();
+    const registrationPendingModal = new ModalWidget(new TextWidget('Registering, please wait...'), false)
+    this.append(registrationPendingModal);
     const formData = new FormData(<HTMLFormElement>evt.target);
     const signUpResponse = await API.signUp(<string>formData.get('email') || '', <string>formData.get('username') || '', <string>formData.get('password') || '');
+
+    registrationPendingModal.dismiss();
 
     if (signUpResponse.ok) {
       this.changeActiveView(UserDialogActiveViewEnum.SignUpSuccess);
@@ -154,8 +148,12 @@ export class UserDialog extends DialogBase {
 
   private async onLoginSubmit(evt: Event) {
     evt.preventDefault();
+    const signInPendingModal = new ModalWidget(new TextWidget('Logging in, please wait...'), false)
+    this.append(signInPendingModal);
     const formData = new FormData(<HTMLFormElement>evt.target);
     const signInResponse = await API.signIn(<string>formData.get('email') || '', <string>formData.get('password') || '');
+
+    signInPendingModal.dismiss();
 
     if (signInResponse.ok) {
       this.services.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.UserLogin, { detail: await signInResponse.json() }));
