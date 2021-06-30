@@ -1,6 +1,4 @@
-import { Services } from "../interfaces.js";
 import { ServiceBase } from "./service-base.js";
-import { AppStateEvent } from './app-state.service.js';
 
 export enum KeyBindingEvent {
   BindingRegistered = 'app-bindingregistered',
@@ -13,7 +11,7 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
   private labelToBindingMapping: { [ label: string ]: string } = {};
   private bindingToLabelMapping: { [ binding: string ]: string } = {};
 
-  constructor(private readonly services: Services) {
+  constructor() {
     super();
   }
 
@@ -80,11 +78,12 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
       sequence.push(code);
     }
 
-
     const keyString = sequence.join('+');
 
     if (this.bindingToLabelMapping[ keyString ]) {
       this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
+      evt.preventDefault();
+      evt.stopImmediatePropagation();
     }
   }
 
@@ -102,14 +101,16 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
   loadKeyBindings(): void {
     let savedKeyBindings = localStorage.getItem('key-bindings');
 
-    if (!savedKeyBindings) {
-      // this.keyBindings = [];
-    } else {
-      const keyBindings = JSON.parse(savedKeyBindings);
-      this.bindingToLabelMapping = {}
+    if (savedKeyBindings) {
+      this.bindingToLabelMapping = JSON.parse(savedKeyBindings);
+      this.labelToBindingMapping = Object.entries(this.bindingToLabelMapping).reduce((prev, next) => {
+        prev[ next[ 1 ] ] = next[ 0 ];
+        return prev;
+      }, <{ [k: string]: string}>{});
     }
   }
 
   saveKeyBindings(): void {
+    localStorage.setItem('key-bindings', JSON.stringify(this.bindingToLabelMapping));
   }
 }
