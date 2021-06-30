@@ -83,7 +83,6 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
     if (this.bindingToLabelMapping[ keyString ]) {
       this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
       evt.preventDefault();
-      evt.stopImmediatePropagation();
     }
   }
 
