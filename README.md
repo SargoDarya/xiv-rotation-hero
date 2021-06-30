@@ -1,10 +1,17 @@
-# ACT Rotation Hero
+![Logo](./docs/img/xivrh-logo.png)
 
-This is a free open source tool to practice your rotation inside and outside of FFXIV.
+<a href="https://discord.gg/d7r8h5tDPA">
+  <img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" />
+</a>
+<img src="https://img.shields.io/github/license/SargoDarya/xiv-rotation-hero" />
+<img src="https://img.shields.io/github/stars/SargoDarya/xiv-rotation-hero?style=flat" />
+<img src="https://img.shields.io/github/issues-raw/SargoDarya/xiv-rotation-hero" />
 
-To give this tool a try, head over to https://sargodarya.github.io/act-rotation-hero/ to practice in the browser or use this URL as overlay in ACT to practice directly in game.
+This is a free open source tool to practice your rotation inside and outside FFXIV.
 
-Note: When talking about the **full** browser version, just opening the URL in the browser is meant. This is completely free.
+To give this tool a try, head over to https://app.xivrotationhero.com/ to practice in the browser or use this URL as overlay in ACT to practice directly in game.
+
+Note: The **full** browser version means opening the URL in the browser. This is completely free.
 
 ## Features
 
@@ -60,10 +67,12 @@ Run a local server
 npm run serve
 ```
 
+# Disclaimer
+
+This project is not sponsored or endorsed by SquareEnix.
+
+Square Enix, Final Fantasy, Final Fantasy XIV, Final Fantasy XIV: Heavensward, Final Fantasy XIV: Stormblood, and all associated logos and designs are trademarks or registered trademarks of Square Enix Holdings Co., Ltd.
+
 # License
 
 This project is licensed under MIT.
-
-# Disclaimer
-
-Square Enix, Final Fantasy, Final Fantasy XIV, Final Fantasy XIV: Heavensward, Final Fantasy XIV: Stormblood, and all associated logos and designs are trademarks or registered trademarks of Square Enix Holdings Co., Ltd.

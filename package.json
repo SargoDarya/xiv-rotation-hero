@@ -1,14 +1,14 @@
 {
-  "name": "act-rotation-trainer",
+  "name": "xiv-rotation-trainer",
   "version": "1.0.0",
-  "description": "A very simple and basic Typescript Starter boilerplate template based on npm",
-  "author": "Savas Ziplies",
+  "description": "Final Fantasy XIV tool for practicing and sharing rotations",
+  "author": "Daniel Klingmann",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sarodarya/act-rotation-trainer"
+    "url": "https://github.com/sargodarya/xiv-rotation-trainer"
   },
-  "bugs": "https://github.com/sarodarya/act-rotation-trainer/issues",
+  "bugs": "https://github.com/sargodarya/xiv-rotation-trainer/issues",
   "keywords": [
     "act",
     "rotation",
