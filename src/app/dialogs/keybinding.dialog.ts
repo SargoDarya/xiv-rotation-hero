@@ -74,6 +74,7 @@ export class KeybindingDialog extends DialogBase {
   }
 
   private onKeyDown(evt: KeyboardEvent): string[] {
+    evt.preventDefault();
     const sequence = [];
 
     // User pressed escape, abort rebinding
@@ -111,9 +112,10 @@ export class KeybindingDialog extends DialogBase {
     const [keyMatch] = evt.code.match(/Key(\S)/g) || [];
     if (keyMatch !== undefined) {
       return [...sequence, keyMatch];
+    } else {
+      // Just return the barebones key
+      return [...sequence, evt.code];
     }
-
-    return [];
   }
 
 }
