@@ -2,7 +2,7 @@ import {
   Rotation,
   User
 } from './rotation-hero/interfaces';
-import { RotationCreation } from './interfaces';
+import {RotationCreation, RotationUpdate} from './interfaces';
 
 interface QueryParams<T> extends Object {
   sortBy?: keyof T
@@ -57,8 +57,12 @@ export class API {
   }
 
   // ROTATIONS
-  static async createRotation(rotation: RotationCreation): Promise<Rotation> {
-    return this.request('/rotation/', 'POST', JSON.stringify(rotation)).then(response => response.json());
+  static async createRotation(rotation: RotationCreation): Promise<Response> {
+    return this.request('/rotation/', 'POST', JSON.stringify(rotation));
+  }
+
+  static async updateRotation(rotation: RotationUpdate): Promise<Response> {
+    return this.request(`/rotation/${rotation.id}`, 'PATCH', JSON.stringify(rotation));
   }
 
   static async publishRotation(rotationId: string): Promise<Rotation> {
@@ -113,7 +117,7 @@ export class API {
     return this.request(`/token/${token}/rotations`, 'GET').then(response => response.json());
   }
 
-  private static request(url: string, method: 'POST' | 'GET' | 'DELETE', body?: string, cache: boolean = false) {
+  private static request(url: string, method: 'POST' | 'PATCH' | 'GET' | 'DELETE', body?: string, cache: boolean = false) {
     return fetch(`${this.API_BASE_URL}${url}`, {
       method,
       headers: {
