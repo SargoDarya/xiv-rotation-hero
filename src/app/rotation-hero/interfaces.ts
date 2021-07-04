@@ -1,4 +1,4 @@
-import { PhaseEnum } from './enums';
+import {PhaseEnum, PublishState} from './enums';
 
 export interface UserShort {
   id: string,
@@ -29,7 +29,7 @@ export interface Rotation {
   id: string,
   patch: string,
   phases: RotationPhase[],
-  public: boolean,
+  publishState: PublishState,
   title: string,
   user: UserShort
 }

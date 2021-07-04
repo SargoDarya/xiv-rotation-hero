@@ -76,13 +76,13 @@ export interface Services {
 export interface RotationCreation {
   title: string,
   description: string,
+  classJobId: number,
   phases: {
     phase: PhaseEnum,
     actions: number[]
   }[]
 }
 
-// private readonly keyBindingService = new KeyBindingService();
-// private readonly actionService = new ActionService();
-// private readonly gamepadService = new GamepadService();
-// private readonly hotbarService;
+export interface RotationUpdate extends RotationCreation {
+  id: string
+}

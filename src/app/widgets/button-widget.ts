@@ -29,4 +29,11 @@ export class ButtonWidget extends WidgetBase {
   get disabled() {
     return this.viewContainer.disabled;
   }
+
+  set title(title: string) {
+    this.viewContainer.title = title;
+  }
+  get title() {
+    return this.viewContainer.title;
+  }
 }

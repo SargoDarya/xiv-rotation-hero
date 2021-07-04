@@ -106,6 +106,9 @@ export class ManualUI extends WidgetBase {
     this.appStateService.addEventListener(AppStateEvent.UserLogout, () => {
       this.toolbarUserButton.text = (<UserDialog>this.dialogInstances.get(UserDialog)).uiTitle;
     });
+
+    // Show rotation hero dialog by default
+    (<RotationHeroDialog>this.dialogInstances.get(RotationHeroDialog)).show();
   }
 
   public startTicking() {

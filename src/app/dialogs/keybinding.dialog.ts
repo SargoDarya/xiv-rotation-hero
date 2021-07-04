@@ -7,6 +7,8 @@ import { KeyBindingEvent } from '../services/key-binding.service.js';
 export class KeybindingDialog extends DialogBase {
   public uiTitle = 'Keybinds';
 
+  private abortController: AbortController;
+
   constructor(services: Services) {
     super(services);
 
@@ -65,12 +67,18 @@ export class KeybindingDialog extends DialogBase {
         } else {
           this.setBinding(label, binding, targetWidget);
         }
-        document.removeEventListener('keydown', listener);
+        document.removeEventListener('keydown', listener, { capture: true });
       }
     }
 
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+
     targetWidget.text = 'Assign keys...';
-    document.addEventListener('keydown', listener);
+    this.abortController = new AbortController();
+    this.abortController.signal.addEventListener('abort', () => this.resetBinding(label, targetWidget));
+    document.addEventListener('keydown', listener, <any>{ capture: true, signal: this.abortController.signal });
   }
 
   private onKeyDown(evt: KeyboardEvent): string[] {

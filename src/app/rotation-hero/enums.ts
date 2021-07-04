@@ -16,3 +16,10 @@ export enum PhaseEnum {
   Cooldown = 'cooldown',
   Burst = 'burst'
 }
+
+export enum PublishState {
+  Unpublished = 'unpublished',
+  InReview = 'inreview',
+  Published = 'published',
+  Rejected = 'rejected'
+}

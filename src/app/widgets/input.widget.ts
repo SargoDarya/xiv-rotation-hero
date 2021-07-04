@@ -14,5 +14,9 @@ export class InputWidget extends WidgetBase {
   constructor(type: FormInputType, className: string = '') {
     super(className, 'input');
     this.viewContainer.type = type;
+
+    this.viewContainer.addEventListener('keydown', (evt) => {
+      evt.stopImmediatePropagation();
+    })
   }
 }

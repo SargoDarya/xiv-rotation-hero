@@ -7,6 +7,7 @@
     outline: none;
   }
 
+  // Meta information styling
   &__meta-toggle {
     display: flex;
     font-size: 11px;
@@ -14,29 +15,45 @@
     align-items: center;
     justify-content: center;
     font-weight: 900;
+    padding: 0;
+  }
+
+  &__meta-information {
+    background: $primary-dark;
+    padding: 6px 12px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 6px;
+  }
+
+  &__meta-label {
+    font-size: 12px;
+    padding: 12px 12px 12px 0;
+  }
+
+  &__rotation-id {
+    display: block;
     width: 100%;
-    background: rgba(0, 0, 0, .3);
-    border-bottom: 1px solid rgba(255, 255, 255, .4);
+    padding: 12px;
+    font-size: 11px;
   }
 
   &__title-input,
   &__description-input {
     display: block;
-    width: 100%;
     resize: none;
     background: transparent;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, .8);
     outline: none;
     color: white;
-    padding: 12px;
+    padding: 4px 8px;
     font-family: 'Fira Sans', sans-serif;
-    border: 0;
+    border: 1px solid $primary-light;
     box-sizing: border-box;
+    font-size: 12px;
 
     &::placeholder {
-      text-transform: uppercase;
-      text-shadow: 0 0 1px black, 0 0 4px rgba(255, 255, 255, 0.4);
-      color: white;
+      // text-shadow: 0 0 1px black, 0 0 4px rgba(255, 255, 255, 0.4);
+      color: lighten($primary-light, 20%);
     }
   }
 
@@ -44,12 +61,16 @@
     display: flex;
     align-items: stretch;
     line-height: 16px;
-    justify-content: space-between;
     background: $primary-dark;
     width: 500px;
+    border-bottom: 1px solid $primary-light;
+
+    &--bottom {
+      justify-content: space-between;
+    }
   }
 
-  &__save-button {
+  &__toolbar-button {
     font-weight: 900;
     text-transform: uppercase;
     padding: 2px 8px;
@@ -63,7 +84,7 @@
     padding: 2px 8px;
     font-size: 10px;
     line-height: inherit;
-    color: red;
+    color: green;
 
     &::before {
       content: '';
@@ -78,11 +99,10 @@
     &:focus,
     &:active,
     &:hover {
-      color: darkred;
+      color: green;
     }
 
     &:disabled {
-      // background: gray;
       color: #777;
       cursor: not-allowed;
 
@@ -94,6 +114,12 @@
     &--recording {
       background: red;
       color: white;
+
+      &:focus,
+      &:active,
+      &:hover {
+        color: white;
+      }
 
       &::before {
         border-radius: 0;
@@ -112,6 +138,7 @@
     background: rgba(0, 0, 0, 0.4);
     color: rgba(255, 255, 255, 0.2);
     margin-right: 1px;
+    height: 100%;
 
     &:focus,
     &:active,

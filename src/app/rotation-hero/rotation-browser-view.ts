@@ -1,5 +1,5 @@
 import {WidgetBase} from '../widgets/widget-base.js';
-import {RotationBrowserCategoryType, RotationBrowserSubCategoryType} from './enums.js';
+import {PublishState, RotationBrowserCategoryType, RotationBrowserSubCategoryType} from './enums.js';
 import {ButtonWidget} from '../widgets/button-widget.js';
 import {ContainerWidget} from '../widgets/container-widget.js';
 import {Rotation} from './interfaces.js';
@@ -8,8 +8,8 @@ import {TextWidget} from '../widgets/text-widget.js';
 import {ImageWidget} from '../widgets/image-widget.js';
 import {Job} from '../interfaces.js';
 import {ModalWidget} from "../widgets/modal-widget.js";
-import {AppStateService} from "../services/app-state.service";
-import {GameDataService} from "../services/game-data.service";
+import {AppStateEvent, AppStateService} from "../services/app-state.service.js";
+import {GameDataService} from "../services/game-data.service.js";
 
 /**
  *
@@ -144,18 +144,61 @@ export class RotationBrowserView extends WidgetBase {
   }
 
   private createRotationListItemView(rotations: Rotation[]): ContainerWidget[] {
+    const currentUserId = this.services.appStateService.loggedInUser ? this.services.appStateService.loggedInUser.id : null;
+
     return rotations.map((rotation) => {
       const classJob = <Job>this.services.gameDataService.getClassJob(rotation.classJobId);
+
+      const widgets: WidgetBase[] = [
+        new ImageWidget(`https://xivapi.com${classJob.Icon}`, 'rotation-browser__list-item-image'),
+        new TextWidget(`${rotation.title}`, 'rotation-browser__list-item-title'),
+        new TextWidget(`${classJob ? classJob.Abbreviation : rotation.classJobId} | 80 | ${rotation.user.username}`, 'rotation-browser__list-item-subtitle'),
+        new TextWidget(`${rotation.favouriteCount} \u2665`, 'rotation-browser__list-item-favourite')
+      ];
+
+      // Owner of the rotation
+      if (currentUserId === rotation.user.id) {
+        switch (rotation.publishState) {
+          default:
+          case PublishState.Unpublished:
+          case PublishState.Rejected:
+            widgets.push(
+              new ContainerWidget('rotation-browser__list-item-actions', {}, [
+                new ButtonWidget(`Edit`, 'rotation-browser__list-item-action', { click: this.editRotation.bind(this, rotation) }),
+                new ButtonWidget(`Publish`, 'rotation-browser__list-item-action', { click: this.publishRotation.bind(this, rotation) }),
+              ])
+            )
+            break;
+
+          case PublishState.Published:
+            widgets.push(
+              new TextWidget(`Published`, 'rotation-browser__list-item-publish-state')
+            );
+            break;
+
+          case PublishState.InReview:
+            widgets.push(
+              new TextWidget(`In Review`, 'rotation-browser__list-item-publish-state')
+            )
+            break;
+        }
+      }
 
       return new ContainerWidget(
         'rotation-browser__list-item',
         { click: this.selectRotation.bind(this, rotation) },
-        [
-          new ImageWidget(`https://xivapi.com${classJob.Icon}`, 'rotation-browser__list-item-image'),
-          new TextWidget(`${rotation.title}`, 'rotation-browser__list-item-title'),
-          new TextWidget(`${classJob ? classJob.Abbreviation : rotation.classJobId} | 80 | Patch: ${rotation.patch} | ${rotation.user.username}`, 'rotation-browser__list-item-subtitle'),
-          new TextWidget(`${rotation.favouriteCount} \u2665`, 'rotation-browser__list-item-favourite'),
-        ])
+        widgets)
     });
+  }
+
+  private publishRotation(rotation: Rotation, evt: MouseEvent) {
+    evt.stopImmediatePropagation();
+
+
+  }
+
+  private editRotation(rotation: Rotation, evt: MouseEvent) {
+    evt.stopImmediatePropagation();
+    this.services.appStateService.dispatchEvent(new CustomEvent(AppStateEvent.EditRotation, { detail: rotation.id }));
   }
 }

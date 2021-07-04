@@ -7,7 +7,7 @@ import { Rotation } from '../rotation-hero/interfaces.js';
 export class RotationHeroDialog extends DialogBase {
   public uiTitle = 'Rotation Hero';
 
-  private rotationHero: RotationHero;
+  private readonly rotationHero: RotationHero;
 
   constructor(
     services: Services
@@ -21,7 +21,6 @@ export class RotationHeroDialog extends DialogBase {
     );
 
     this.rotationHero = new RotationHero(this.services, false);
-    this.isVisible = false;
 
     this.appendContent(this.rotationHero);
 

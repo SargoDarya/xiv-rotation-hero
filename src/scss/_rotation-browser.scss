@@ -54,7 +54,7 @@
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
       'img title favourites'
-      'img subtitle favourites';
+      'img subtitle actions';
     background: #323232;
     cursor: pointer;
 
@@ -88,10 +88,22 @@
     line-height: 1.5;
   }
 
-  &__list-item-favourites {
-    font-size: 12px;
+  &__list-item-favourite {
+    font-size: 14px;
     color: #e1e1e1;
     grid-area: favourites;
+    text-align: right;
+  }
+
+  &__list-item-actions {
+    grid-area: actions;
+  }
+
+  &__list-item-action {
+    font-size: 12px;
+    padding: 0;
+    line-height: 1;
+    margin: 0 4px;
   }
 
 }

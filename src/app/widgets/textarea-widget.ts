@@ -12,5 +12,9 @@ export class TextareaWidget extends WidgetBase {
 
   constructor(className: string) {
     super(className, 'textarea');
+
+    this.viewContainer.addEventListener('keydown', (evt) => {
+      evt.stopImmediatePropagation();
+    });
   }
 }

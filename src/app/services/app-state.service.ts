@@ -8,7 +8,8 @@ export enum AppStateEvent {
   DialogOrderChanged = 'app-dialogfocuschanged',
   TryRotation = 'app-tryrotation',
   UserLogin = 'app-userlogin',
-  UserLogout = 'app-userlogout'
+  UserLogout = 'app-userlogout',
+  EditRotation = 'app-editrotation'
 }
 
 export enum AppStateKey {
