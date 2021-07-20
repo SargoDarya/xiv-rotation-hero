@@ -13,9 +13,9 @@ interface HotbarAllocation {
 export class HotbarService implements ServiceBase {
   public hotbars: Hotbar[];
   public crossHotbar: CrossHotbar;
+  public readonly hotbarContainerWidget = new ContainerWidget('hotbars');
 
   private readonly HOTBAR_PERSISTANCE_KEY = 'hotbar-allocation-';
-  private readonly hotbarContainerWidget = new ContainerWidget('hotbars');
   private hotbarSettings: HotbarOptions[];
   private HOTBAR_KEYS = [
     '1',
@@ -32,12 +32,23 @@ export class HotbarService implements ServiceBase {
     'KeyB'
   ];
   private currentClassJobId: number;
+  private readonly HOTBAR_DEFAULTS: HotbarOptions[] = [
+    { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.92 ], scale: .8 },
+    { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.84 ], scale: .8 },
+    { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.76 ], scale: .8 },
+    { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.68 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.60 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.52 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.44 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.36 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.28 ], scale: .8 },
+    { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0.2, 0.20 ], scale: .8 }
+  ];
 
   constructor(private readonly services: Services) {}
 
   public init() {
     this.hotbarSettings = this.loadSettings();
-    document.body.appendChild(this.hotbarContainerWidget.viewContainer);
     this.constructHotbars();
 
     this.crossHotbar = new CrossHotbar(this.services);
@@ -155,18 +166,7 @@ export class HotbarService implements ServiceBase {
     /**
      * Return some sane defaults for the hotbars
      */
-    return [
-      { visible: true,  hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0.1 ], scale: .8 },
-      { visible: true,  hotbarStyle: HotbarStyle.SplitHorizontal, position: [ 0, 0.15 ], scale: .8 },
-      { visible: true,  hotbarStyle: HotbarStyle.DoubleSplitHorizontal, position: [ 0, 0.2 ], scale: .8 },
-      { visible: true,  hotbarStyle: HotbarStyle.DoubleSplitVertical, position: [ 0, 0.25 ], scale: .8 },
-      { visible: true,  hotbarStyle: HotbarStyle.SplitVertical, position: [ 0, 0 ], scale: .8 },
-      { visible: true,  hotbarStyle: HotbarStyle.Vertical, position: [ 0, 0 ], scale: .8 },
-      { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0 ], scale: .8 },
-      { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0 ], scale: .8 },
-      { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0 ], scale: .8 },
-      { visible: false, hotbarStyle: HotbarStyle.Horizontal, position: [ 0, 0 ], scale: .8 }
-    ]
+    return this.HOTBAR_DEFAULTS;
   }
 
   public persistSettings() {

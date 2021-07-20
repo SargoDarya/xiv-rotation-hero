@@ -149,7 +149,7 @@ export class Hotbar extends WidgetBase {
     this.lastMousePosition = [ clientX, clientY ];
 
     // convert to percentage
-    this.position = [ (realX - diffX) / width, (realY - diffY) / height ];
+    this.position = [ Math.max((realX - diffX) / width, 0), Math.max((realY - diffY) / height, 0) ];
   }
 
   onMouseDragStop(evt: MouseEvent): void {

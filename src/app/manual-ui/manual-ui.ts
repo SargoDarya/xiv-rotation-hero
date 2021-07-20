@@ -148,6 +148,9 @@ export class ManualUI extends WidgetBase {
     // Create nicer class selection here
     this.createJobSelectionView();
 
+    // Add hotbar view
+    this.append(this.hotbarService.hotbarContainerWidget);
+
     // Instantiate dialogs
     this.append(this.dialogContainer);
     this.createDialogs();
