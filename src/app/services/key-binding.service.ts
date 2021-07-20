@@ -11,6 +11,8 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
   private labelToBindingMapping: { [ label: string ]: string } = {};
   private bindingToLabelMapping: { [ binding: string ]: string } = {};
 
+  private lastKeyboardEvent?: KeyboardEvent;
+
   constructor() {
     super();
   }
@@ -18,6 +20,8 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
   public init() {
     this.loadKeyBindings();
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    document.addEventListener('keyup', this.handleKeyUp.bind(this));
+    document.addEventListener('mousedown', this.handleMouseDown.bind(this));
   }
 
   getAllKeyBindings() {
@@ -55,12 +59,44 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
     this.saveKeyBindings();
   }
 
-  handleKeyDown(evt: KeyboardEvent): void {
-    const { code, ctrlKey, shiftKey, altKey, repeat } = evt;
+  handleMouseDown(evt: MouseEvent): void {
+    const { button } = evt;
 
-    if (repeat) {
+    let sequence: string[] = [];
+
+    if (this.lastKeyboardEvent) {
+      sequence = this.getKeySequenceFromEvent(this.lastKeyboardEvent)
+    }
+
+    sequence.push(`M${button}`);
+    const keyString = sequence.join('+');
+
+    if (this.bindingToLabelMapping[ keyString ]) {
+      this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
+      evt.preventDefault();
+    }
+  }
+
+  handleKeyDown(evt: KeyboardEvent): void {
+    if (evt.repeat) {
       return;
     }
+
+    const sequence = this.getKeySequenceFromEvent(evt);
+    const keyString = sequence.join('+');
+
+    if (this.bindingToLabelMapping[ keyString ]) {
+      this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
+      evt.preventDefault();
+    }
+  }
+
+  handleKeyUp() {
+    this.lastKeyboardEvent = undefined;
+  }
+
+  getKeySequenceFromEvent(evt: KeyboardEvent) {
+    const { code, ctrlKey, shiftKey, altKey } = evt;
 
     const sequence = [];
     if (ctrlKey) sequence.push('Ctrl');
@@ -78,12 +114,7 @@ export class KeyBindingService extends EventTarget implements ServiceBase {
       sequence.push(code);
     }
 
-    const keyString = sequence.join('+');
-
-    if (this.bindingToLabelMapping[ keyString ]) {
-      this.availableBindings[ this.bindingToLabelMapping[ keyString ] ]();
-      evt.preventDefault();
-    }
+    return sequence;
   }
 
   registerAvailableBindings(label: string, keyDefault: string | undefined, cb: () => any): void {

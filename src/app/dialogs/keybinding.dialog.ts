@@ -18,6 +18,7 @@ export class KeybindingDialog extends DialogBase {
     this.createView();
 
     this.onKeyDown = this.onKeyDown.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
 
     this.afterViewCreated();
   }
@@ -56,19 +57,24 @@ export class KeybindingDialog extends DialogBase {
   }
 
   private listenForKeyPress(label: string, targetWidget: TextWidget) {
-    const listener = (evt: KeyboardEvent) => {
-      evt.stopImmediatePropagation();
-
-      const binding = this.onKeyDown(evt);
-
+    const checkBinding = (binding: string[]) => {
       if (binding.length) {
         if (binding[ 0 ] === 'Escape') {
           this.resetBinding(label, targetWidget);
         } else {
           this.setBinding(label, binding, targetWidget);
         }
-        document.removeEventListener('keydown', listener, { capture: true });
+        document.removeEventListener('keydown', keyListener, { capture: true });
+        document.removeEventListener('mousedown', mouseListener, { capture: true });
       }
+    };
+    const keyListener = (evt: KeyboardEvent) => {
+      evt.stopImmediatePropagation();
+      checkBinding(this.onKeyDown(evt));
+    }
+    const mouseListener  = (evt: MouseEvent) => {
+      evt.stopImmediatePropagation();
+      checkBinding(this.onMouseDown(evt));
     }
 
     if (this.abortController) {
@@ -78,7 +84,8 @@ export class KeybindingDialog extends DialogBase {
     targetWidget.text = 'Assign keys...';
     this.abortController = new AbortController();
     this.abortController.signal.addEventListener('abort', () => this.resetBinding(label, targetWidget));
-    document.addEventListener('keydown', listener, <any>{ capture: true, signal: this.abortController.signal });
+    document.addEventListener('keydown', keyListener, <any>{ capture: true, signal: this.abortController.signal });
+    document.addEventListener('mousedown', mouseListener, <any>{ capture: true, signal: this.abortController.signal });
   }
 
   private onKeyDown(evt: KeyboardEvent): string[] {
@@ -124,6 +131,18 @@ export class KeybindingDialog extends DialogBase {
       // Just return the barebones key
       return [...sequence, evt.code];
     }
+  }
+
+  private onMouseDown(evt: MouseEvent) {
+    evt.preventDefault();
+    const sequence = [];
+
+    // Add modifiers to sequence
+    evt.ctrlKey && sequence.push('Ctrl');
+    evt.shiftKey && sequence.push('Shift');
+    evt.altKey && sequence.push('Alt');
+
+    return [...sequence, `M${evt.button}`];
   }
 
 }
